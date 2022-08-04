@@ -105,13 +105,19 @@ farewell_1          BYTE    "If you have made it this far, congratulations! Than
 
 .code
 main PROC
-
 ; (insert executable instructions here)
 
+	call introduction
+	call fillArray
+	call sortList
+	call exchangeElements
+	call displayMedian
+	call displayList
+	call countList
+	call farewell			; My additional procedure
 
 	Invoke ExitProcess,0	; exit to operating system
 main ENDP
-
 ; (insert additional procedures here)
 
 END main
