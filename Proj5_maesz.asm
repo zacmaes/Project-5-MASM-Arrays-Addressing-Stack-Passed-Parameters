@@ -103,21 +103,102 @@ list_message        BYTE    "Your list of instances of each generated number, st
 ; FAREWELL DATA
 farewell_1          BYTE    "If you have made it this far, congratulations! Thanks for reading my program, goodbye!",0
 
+; TEST DATA --- DELETE THIS
+test_end_1			BYTE	"test_end_1 string",0
+
 .code
 main PROC
 ; (insert executable instructions here)
+	
+	PUSH OFFSET greeting		; offset +4
+	PUSH OFFSET description_1   ; offset +4
+	CALL introduction			; return address +4
 
-	call introduction
-	call fillArray
-	call sortList
-	call exchangeElements
-	call displayMedian
-	call displayList
-	call countList
-	call farewell			; My additional procedure
+;	CALL fillArray
+;	CALL sortList
+;	CALL exchangeElements
+;	CALL displayMedian
+;	CALL displayList
+;	CALL countList
+
+
+	CALL farewell			; My additional procedure
+	
+	; TEST END ---- DELETE THIS
+	MOV EDX, OFFSET test_end_1
+	CALL WriteString
+	CALL CrLf
 
 	Invoke ExitProcess,0	; exit to operating system
 main ENDP
 ; (insert additional procedures here)
+
+; ---------------------------------------------------------------------------------
+; Name: introduction
+;
+; Description: 
+;
+; Preconditions: 
+;
+; Postconditions:
+;
+; Receives:
+;
+; Returns:
+; ---------------------------------------------------------------------------------
+
+introduction PROC
+	; Set up Base pointer
+	PUSH EBP		; +4
+	MOV  EBP, ESP	; Base Pointer
+	;PUSH EDX
+	; ...
+
+	MOV  EDX, [EBP+12] 
+	CALL WriteString
+	CALL CrLf
+	CALL CrLf
+
+	MOV  EDX, [EBP+8]
+	CALL WriteString
+	CALL CrLf
+	CALL CrLf
+
+	;...
+	;POP EDX
+	POP EBP
+	RET 8
+introduction ENDP
+
+
+
+; ---------------------------------------------------------------------------------
+; Name: farewell
+;
+; Description: 
+;
+; Preconditions: 
+;
+; Postconditions:
+;
+; Receives:
+;
+; Returns:
+; ---------------------------------------------------------------------------------
+
+farewell PROC
+	; Set up Base pointer
+	;PUSH EBP		; +4
+	;MOV  EBP, ESP	; Base Pointer
+	;PUSH EDX
+	; ...
+
+	MOV  EDX, OFFSET farewell_1 
+	CALL WriteString
+	CALL CrLf
+	CALL CrLf
+
+	RET
+farewell ENDP
 
 END main
