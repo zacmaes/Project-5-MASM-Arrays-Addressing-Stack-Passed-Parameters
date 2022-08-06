@@ -103,31 +103,35 @@ list_message        BYTE    "Your list of instances of each generated number, st
 ; FAREWELL DATA
 farewell_1          BYTE    "If you have made it this far, congratulations! Thanks for reading my program, goodbye!",0
 
-; TEST DATA --- DELETE THIS
-test_end_1			BYTE	"test_end_1 string",0
-
 .code
 main PROC
 ; (insert executable instructions here)
 	
-	PUSH OFFSET greeting		; offset +4
-	PUSH OFFSET description_1   ; offset +4
-	CALL introduction			; return address +4
+	PUSH OFFSET greeting		 ; offset +4
+	PUSH OFFSET description_1    ; offset +4
+	CALL introduction			 ; return address +4
 
 ;	CALL fillArray
+
+	PUSH OFFSET unsorted_message ; offset +4
+	CALL displayList			 ; displayList 1st call for unsorted
+
 ;	CALL sortList
+
+	PUSH OFFSET sorted_message   ; offset +4
+	CALL displayList			 ; displayList 2nd call for sorted
+
+	PUSH OFFSET list_message     ; offset +4
+	CALL displayList		     ; displayList 3rd call for list_message
+
+;  OTHER REQUIRED PROCS
 ;	CALL exchangeElements
 ;	CALL displayMedian
-;	CALL displayList
+;	CALL displayList			; this procedure is called 3 times to display the various arrays
 ;	CALL countList
 
-
-	CALL farewell			; My additional procedure
-	
-	; TEST END ---- DELETE THIS
-	MOV EDX, OFFSET test_end_1
-	CALL WriteString
-	CALL CrLf
+    PUSH OFFSET farewell_1	;offset +4
+	CALL farewell			; My additional procedure, stack return address +4
 
 	Invoke ExitProcess,0	; exit to operating system
 main ENDP
@@ -151,7 +155,7 @@ introduction PROC
 	; Set up Base pointer
 	PUSH EBP		; +4
 	MOV  EBP, ESP	; Base Pointer
-	;PUSH EDX
+	PUSH EDX
 	; ...
 
 	MOV  EDX, [EBP+12] 
@@ -165,10 +169,41 @@ introduction PROC
 	CALL CrLf
 
 	;...
-	;POP EDX
+	POP EDX
 	POP EBP
 	RET 8
 introduction ENDP
+
+; ---------------------------------------------------------------------------------
+; Name: displayList
+;
+; Description: 
+;
+; Preconditions: 
+;
+; Postconditions:
+;
+; Receives:
+;
+; Returns:
+; ---------------------------------------------------------------------------------
+
+displayList PROC
+	; Set up Base pointer
+	PUSH EBP		; +4
+	MOV  EBP, ESP	; Base Pointer
+	PUSH EDX        ; preserve edx
+	; ...
+
+	MOV  EDX, [EBP+8] 
+	CALL WriteString
+	CALL CrLf
+	CALL CrLf
+
+	POP	EDX
+	POP	EBP
+	RET 4
+displayList ENDP
 
 
 
@@ -188,17 +223,19 @@ introduction ENDP
 
 farewell PROC
 	; Set up Base pointer
-	;PUSH EBP		; +4
-	;MOV  EBP, ESP	; Base Pointer
-	;PUSH EDX
+	PUSH EBP		; +4
+	MOV  EBP, ESP	; Base Pointer
+	PUSH EDX        ; preserve edx
 	; ...
 
-	MOV  EDX, OFFSET farewell_1 
+	MOV  EDX, [EBP+8] 
 	CALL WriteString
 	CALL CrLf
 	CALL CrLf
 
-	RET
+	POP	EDX
+	POP	EBP
+	RET 4
 farewell ENDP
 
 END main

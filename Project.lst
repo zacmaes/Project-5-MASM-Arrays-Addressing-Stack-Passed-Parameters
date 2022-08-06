@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/04/22 16:09:54
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/06/22 15:46:39
 <Project Five: Arrays, Addressing, Stack Passed Params     (  Page 1 - 1
 
 
@@ -209,39 +209,40 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/04/22 16:09:54
 	   6F 64 62 79 65
 	   21 00
 
-				; TEST DATA
- 000001BE 74 65 73 74 5F	test_end_1			BYTE	"test_end_1 string",0
-	   65 6E 64 5F 31
-	   20 73 74 72 69
-	   6E 67 00
-
  00000000			.code
  00000000			main PROC
 				; (insert executable instructions here)
 					
- 00000000  68 00000000 R		PUSH OFFSET greeting		; offset +4
- 00000005  68 00000052 R		PUSH OFFSET description_1   ; offset +4
- 0000000A  E8 0000001B			CALL introduction			; return address +4
+ 00000000  68 00000000 R		PUSH OFFSET greeting		 ; offset +4
+ 00000005  68 00000052 R		PUSH OFFSET description_1    ; offset +4
+ 0000000A  E8 0000002F			CALL introduction			 ; return address +4
 
 				;	CALL fillArray
+
+ 0000000F  68 000000BA R		PUSH OFFSET unsorted_message ; offset +4
+ 00000014  E8 00000052			CALL displayList			 ; displayList 1st call for unsorted
+
 				;	CALL sortList
+
+ 00000019  68 000000F8 R		PUSH OFFSET sorted_message   ; offset +4
+ 0000001E  E8 00000048			CALL displayList			 ; displayList 2nd call for sorted
+
+ 00000023  68 00000114 R		PUSH OFFSET list_message     ; offset +4
+ 00000028  E8 0000003E			CALL displayList		     ; displayList 3rd call for list_message
+
+				;  OTHER REQUIRED PROCS
 				;	CALL exchangeElements
 				;	CALL displayMedian
-				;	CALL displayList
+;	CALL displayList			; this procedure is called 3 times to display the various arrays
 				;	CALL countList
 
-
- 0000000F  E8 00000041			CALL farewell			; My additional procedure
-					
-					; TEST END
- 00000014  BA 000001BE R		MOV EDX, OFFSET test_end_1
- 00000019  E8 00000000 E		CALL WriteString
- 0000001E  E8 00000000 E		CALL CrLf
+ 0000002D  68 00000167 R	    PUSH OFFSET farewell_1	;offset +4
+ 00000032  E8 0000004F			CALL farewell			; My additional procedure, stack return address +4
 
 					Invoke ExitProcess,0	; exit to operating system
- 00000023  6A 00	   *	    push   +000000000h
- 00000025  E8 00000000 E   *	    call   ExitProcess
- 0000002A			main ENDP
+ 00000037  6A 00	   *	    push   +000000000h
+ 00000039  E8 00000000 E   *	    call   ExitProcess
+ 0000003E			main ENDP
 				; (insert additional procedures here)
 
 				; ---------------------------------------------------------------------------------
@@ -258,28 +259,59 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/04/22 16:09:54
 				; Returns:
 				; ---------------------------------------------------------------------------------
 
- 0000002A			introduction PROC
+ 0000003E			introduction PROC
 					; Set up Base pointer
- 0000002A  55				PUSH EBP		; +4
- 0000002B  8B EC			MOV  EBP, ESP	; Base Pointer
-					;PUSH EDX
+ 0000003E  55				PUSH EBP		; +4
+ 0000003F  8B EC			MOV  EBP, ESP	; Base Pointer
+ 00000041  52				PUSH EDX
 					; ...
 
- 0000002D  8B 55 0C			MOV  EDX, [EBP+12] 
- 00000030  E8 00000000 E		CALL WriteString
- 00000035  E8 00000000 E		CALL CrLf
- 0000003A  E8 00000000 E		CALL CrLf
+ 00000042  8B 55 0C			MOV  EDX, [EBP+12] 
+ 00000045  E8 00000000 E		CALL WriteString
+ 0000004A  E8 00000000 E		CALL CrLf
+ 0000004F  E8 00000000 E		CALL CrLf
 
- 0000003F  8B 55 08			MOV  EDX, [EBP+8]
- 00000042  E8 00000000 E		CALL WriteString
- 00000047  E8 00000000 E		CALL CrLf
- 0000004C  E8 00000000 E		CALL CrLf
+ 00000054  8B 55 08			MOV  EDX, [EBP+8]
+ 00000057  E8 00000000 E		CALL WriteString
+ 0000005C  E8 00000000 E		CALL CrLf
+ 00000061  E8 00000000 E		CALL CrLf
 
 					;...
-					;POP EDX
- 00000051  5D				POP EBP
- 00000052  C2 0008			RET 8
- 00000055			introduction ENDP
+ 00000066  5A				POP EDX
+ 00000067  5D				POP EBP
+ 00000068  C2 0008			RET 8
+ 0000006B			introduction ENDP
+
+				; ---------------------------------------------------------------------------------
+				; Name: displayList
+				;
+				; Description: 
+				;
+				; Preconditions: 
+				;
+				; Postconditions:
+				;
+				; Receives:
+				;
+				; Returns:
+				; ---------------------------------------------------------------------------------
+
+ 0000006B			displayList PROC
+					; Set up Base pointer
+ 0000006B  55				PUSH EBP		; +4
+ 0000006C  8B EC			MOV  EBP, ESP	; Base Pointer
+ 0000006E  52				PUSH EDX        ; preserve edx
+					; ...
+
+ 0000006F  8B 55 08			MOV  EDX, [EBP+8] 
+ 00000072  E8 00000000 E		CALL WriteString
+ 00000077  E8 00000000 E		CALL CrLf
+ 0000007C  E8 00000000 E		CALL CrLf
+
+ 00000081  5A				POP	EDX
+ 00000082  5D				POP	EBP
+ 00000083  C2 0004			RET 4
+ 00000086			displayList ENDP
 
 
 
@@ -297,23 +329,25 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/04/22 16:09:54
 				; Returns:
 				; ---------------------------------------------------------------------------------
 
- 00000055			farewell PROC
+ 00000086			farewell PROC
 					; Set up Base pointer
-					;PUSH EBP		; +4
-					;MOV  EBP, ESP	; Base Pointer
-					;PUSH EDX
+ 00000086  55				PUSH EBP		; +4
+ 00000087  8B EC			MOV  EBP, ESP	; Base Pointer
+ 00000089  52				PUSH EDX        ; preserve edx
 					; ...
 
- 00000055  BA 00000167 R		MOV  EDX, OFFSET farewell_1 
- 0000005A  E8 00000000 E		CALL WriteString
- 0000005F  E8 00000000 E		CALL CrLf
- 00000064  E8 00000000 E		CALL CrLf
+ 0000008A  8B 55 08			MOV  EDX, [EBP+8] 
+ 0000008D  E8 00000000 E		CALL WriteString
+ 00000092  E8 00000000 E		CALL CrLf
+ 00000097  E8 00000000 E		CALL CrLf
 
- 00000069  C3				RET
- 0000006A			farewell ENDP
+ 0000009C  5A				POP	EDX
+ 0000009D  5D				POP	EBP
+ 0000009E  C2 0004			RET 4
+ 000000A1			farewell ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/04/22 16:09:54
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/06/22 15:46:39
 <Project Five: Arrays, Addressing, Stack Passed Params     (  Symbols 2 - 1
 
 
@@ -407,8 +441,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000001D0 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000006A Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000001BE Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000A1 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -515,9 +549,10 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-farewell . . . . . . . . . . . .	P Near	 00000055 _TEXT	Length= 00000015 Public STDCALL
-introduction . . . . . . . . . .	P Near	 0000002A _TEXT	Length= 0000002B Public STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000002A Public STDCALL
+displayList  . . . . . . . . . .	P Near	 0000006B _TEXT	Length= 0000001B Public STDCALL
+farewell . . . . . . . . . . . .	P Near	 00000086 _TEXT	Length= 0000001B Public STDCALL
+introduction . . . . . . . . . .	P Near	 0000003E _TEXT	Length= 0000002D Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000003E Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -760,7 +795,6 @@ magenta  . . . . . . . . . . . .	Number	 00000005h
 median_message . . . . . . . . .	Byte	 000000D8 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
 sorted_message . . . . . . . . .	Byte	 000000F8 _DATA	
-test_end_1 . . . . . . . . . . .	Byte	 000001BE _DATA	
 unsorted_message . . . . . . . .	Byte	 000000BA _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
