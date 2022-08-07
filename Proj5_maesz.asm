@@ -99,22 +99,52 @@ unsorted_message    BYTE    "Your unsorted random numbers:",0
 median_message      BYTE    "The median value of the array: ",0
 sorted_message      BYTE    "Your sorted random numbers:",0
 list_message        BYTE    "Your list of instances of each generated number, starting with the smallest value:",0
+one_space           BYTE    " ",0
+
+
+; ARRAY
+randArray			DWORD   ARRAYSIZE DUP(?)	; DUP declaration, empty Array of ARRAYSIZE 
 
 ; FAREWELL DATA
 farewell_1          BYTE    "If you have made it this far, congratulations! Thanks for reading my program, goodbye!",0
 
+
+
 .code
 main PROC
 ; (insert executable instructions here)
+	CALL Randomize				 ; Initialize starting seed vaue of RandomRange procedure
 	
 	PUSH OFFSET greeting		 ; offset +4
 	PUSH OFFSET description_1    ; offset +4
 	CALL introduction			 ; return address +4
 
-;	CALL fillArray
+	PUSH OFFSET randArray        ; pass address of element 1 in randArray
+	PUSH ARRAYSIZE
+	PUSH LO
+	PUSH HI
+	CALL fillArray
+
+	; TEST DISPLAY IN MAIN---DELETE THIS---THIS bWorks!!!
+	CALL CrLf
+	MOV  ESI, OFFSET randArray
+	MOV  ECX, LENGTHOF randArray
+	_PrintArrTest:
+		MOV EAX, [ESI]
+		CALL WriteDec
+
+		MOV EDX, OFFSET one_space
+		CALL WriteString
+
+		ADD ESI, 4
+		
+		LOOP _PrintArrTest
+	CALL CrLf
 
 	PUSH OFFSET unsorted_message ; offset +4
 	CALL displayList			 ; displayList 1st call for unsorted
+
+
 
 ;	CALL sortList
 
@@ -175,6 +205,54 @@ introduction PROC
 introduction ENDP
 
 ; ---------------------------------------------------------------------------------
+; Name: fillArray
+;
+; Description: 
+;
+; Preconditions: 
+;
+; Postconditions:
+;
+; Receives:
+;
+; Returns:
+; ---------------------------------------------------------------------------------
+
+fillArray PROC
+	; Set up Base pointer
+	PUSH EBP		; +4
+	MOV  EBP, ESP	; Base Pointer
+
+	PUSH EAX        ; Preserve used registers
+	PUSH ECX
+	PUSH EDI
+	; ...
+	MOV  ECX, [EBP+16] ; List length into ECX
+	MOV  EDI, [EBP+20] ; Address of list into EDI
+
+	;...LOOP...
+	_fillLoop:
+		; GENERATE RANDOM NUM
+		MOV EAX, [EBP+8]  ; HI from stack into EAX
+		SUB EAX, [EBP+12] ; HI - LO
+		INC EAX			  ; add 1 to EAX to get upper limit(exclusive) for randomRange	
+		CALL RandomRange  ; generates 0 - EAX (exclusive), saves random val in EAX
+		ADD EAX, [EBP+12] ; Add LO value to EAX random num to get random within HI-LO range
+
+		; FILL ARRAY
+		MOV [EDI], EAX	  ; overwrite value in memory pointed to by EDI
+		ADD EDI, 4		  ; Hardcoded 4 (DWORD) to increment to next index in Array
+		LOOP _fillLoop
+
+	;...
+	POP EDI
+	POP ECX
+	POP EAX
+	POP EBP
+	RET 16
+fillArray ENDP
+
+; ---------------------------------------------------------------------------------
 ; Name: displayList
 ;
 ; Description: 
@@ -199,6 +277,9 @@ displayList PROC
 	CALL WriteString
 	CALL CrLf
 	CALL CrLf
+
+	; ...
+	; Display the list of ints here
 
 	POP	EDX
 	POP	EBP
@@ -239,3 +320,17 @@ farewell PROC
 farewell ENDP
 
 END main
+
+; DELETE THIS!!!
+; EXAMPLE PYTHON INSERTION SORT
+; def insertion_sort(a_list):
+;     """
+;     Insertion sort algorithm that sorts a_list in ascending order.
+;     """
+;     for index in range(1, len(a_list)):
+;         value = a_list[index]
+;         pos = index - 1
+;         while pos >= 0 and a_list[pos] > value:
+;             a_list[pos + 1] = a_list[pos]
+;             pos -= 1
+;         a_list[pos + 1] = value
