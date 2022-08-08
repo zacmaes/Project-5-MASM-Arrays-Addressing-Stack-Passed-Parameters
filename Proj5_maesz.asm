@@ -177,10 +177,16 @@ main PROC
 	CALL displayMedian
 
 	; ---
+	PUSH OFFSET randArray
+	PUSH OFFSET countsArray
+	CALL countList
+
+
+	; ---
 
 	PUSH OFFSET one_space		; push the space string
 	PUSH OFFSET list_message     ; offset +4
-	PUSH OFFSET randArray			; ****** THIS WILL NEED TO BE CHANGED TO THE NUMS LIST EVENTUALLY *****
+	PUSH OFFSET	countsArray			; ****** THIS WILL NEED TO BE CHANGED TO THE NUMS LIST EVENTUALLY *****
 	PUSH arrayLength
 	PUSH arrayType
 	CALL displayList		     ; displayList 3rd call for list_message
@@ -319,7 +325,7 @@ displayList PROC
 
 	; TEST DISPLAY IN MAIN---DELETE THIS---THIS bWorks!!!
 	MOV  ESI, [EBP+16]	; move randArray start ref to ESI
-	MOV  ECX, [EBP+12]	; move arrayLength to ECX
+	MOV  ECX, ARRAYSIZE	; move ARRAYSIZE to ECX counter
 	_PrintArr:
 		MOV EAX, [ESI]
 		CALL WriteDec
@@ -503,6 +509,34 @@ displayMedian PROC
 	POP	EBP
 	RET 8
 displayMedian ENDP
+
+; ---------------------------------------------------------------------------------
+; Name: countList
+;
+; Description: 
+;
+; Preconditions: 
+;
+; Postconditions:
+;
+; Receives:
+;
+; Returns:
+; ---------------------------------------------------------------------------------
+
+countList PROC
+	; Set up Base pointer
+	PUSH EBP		; +4
+	MOV  EBP, ESP	; Base Pointer
+	PUSHAD        ; preserve registers
+	; ...
+
+	
+
+	POPAD
+	POP	EBP
+	RET 8
+countList ENDP
 
 
 
