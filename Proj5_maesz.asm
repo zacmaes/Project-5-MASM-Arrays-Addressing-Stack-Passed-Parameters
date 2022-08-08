@@ -103,7 +103,9 @@ one_space           BYTE    " ",0
 
 
 ; ARRAY
-randArray			DWORD   ARRAYSIZE DUP(?)	; DUP declaration, empty Array of ARRAYSIZE 
+randArray			DWORD   ARRAYSIZE DUP(?)	; DUP declaration, empty Array of ARRAYSIZE
+arrayLength			DWORD	LENGTHOF randArray  ; save length of randArray
+arrayType			DWORD   TYPE randArray		; save type size of randArray values
 
 ; FAREWELL DATA
 farewell_1          BYTE    "If you have made it this far, congratulations! Thanks for reading my program, goodbye!",0
@@ -114,10 +116,14 @@ farewell_1          BYTE    "If you have made it this far, congratulations! Than
 main PROC
 ; (insert executable instructions here)
 	CALL Randomize				 ; Initialize starting seed vaue of RandomRange procedure
+
+	; ---
 	
 	PUSH OFFSET greeting		 ; offset +4
 	PUSH OFFSET description_1    ; offset +4
 	CALL introduction			 ; return address +4
+
+	; ---
 
 	PUSH OFFSET randArray        ; pass address of element 1 in randArray
 	PUSH ARRAYSIZE
@@ -125,40 +131,47 @@ main PROC
 	PUSH HI
 	CALL fillArray
 
-	; TEST DISPLAY IN MAIN---DELETE THIS---THIS bWorks!!!
-	CALL CrLf
-	MOV  ESI, OFFSET randArray
-	MOV  ECX, LENGTHOF randArray
-	_PrintArrTest:
-		MOV EAX, [ESI]
-		CALL WriteDec
+	; ---
 
-		MOV EDX, OFFSET one_space
-		CALL WriteString
-
-		ADD ESI, 4
-		
-		LOOP _PrintArrTest
-	CALL CrLf
-
+	PUSH OFFSET one_space		; push the space string
 	PUSH OFFSET unsorted_message ; offset +4
+	PUSH OFFSET randArray
+	PUSH arrayLength
+	PUSH arrayType
 	CALL displayList			 ; displayList 1st call for unsorted
 
-
+	; ---
 
 ;	CALL sortList
 
+	; ---
+
+	PUSH OFFSET one_space		; push the space string
 	PUSH OFFSET sorted_message   ; offset +4
+	PUSH OFFSET randArray
+	PUSH arrayLength
+	PUSH arrayType
 	CALL displayList			 ; displayList 2nd call for sorted
 
+	; ---
+
+	PUSH OFFSET one_space		; push the space string
 	PUSH OFFSET list_message     ; offset +4
+	PUSH OFFSET randArray			; ****** THIS WILL NEED TO BE CHANGED TO THE NUMS LIST EVENTUALLY *****
+	PUSH arrayLength
+	PUSH arrayType
 	CALL displayList		     ; displayList 3rd call for list_message
+
+	; ---
+
 
 ;  OTHER REQUIRED PROCS
 ;	CALL exchangeElements
 ;	CALL displayMedian
 ;	CALL displayList			; this procedure is called 3 times to display the various arrays
 ;	CALL countList
+
+	; ---
 
     PUSH OFFSET farewell_1	;offset +4
 	CALL farewell			; My additional procedure, stack return address +4
@@ -270,20 +283,37 @@ displayList PROC
 	; Set up Base pointer
 	PUSH EBP		; +4
 	MOV  EBP, ESP	; Base Pointer
-	PUSH EDX        ; preserve edx
+
+	PUSHAD			; preserve all gp registers
 	; ...
 
-	MOV  EDX, [EBP+8] 
+	MOV  EDX, [EBP+20] ; Write the message string
 	CALL WriteString
-	CALL CrLf
 	CALL CrLf
 
 	; ...
 	; Display the list of ints here
 
-	POP	EDX
-	POP	EBP
-	RET 4
+	; TEST DISPLAY IN MAIN---DELETE THIS---THIS bWorks!!!
+	MOV  ESI, [EBP+16]	; move randArray start ref to ESI
+	MOV  ECX, [EBP+12]	; move arrayLength to ECX
+	_PrintArr:
+		MOV EAX, [ESI]
+		CALL WriteDec
+
+		MOV EDX, [EBP+24]	; wrtie the one_space string
+		CALL WriteString
+
+		ADD ESI, [EBP+8]
+		
+		LOOP _PrintArr
+	
+	CALL CrLf
+	CALL CrLf
+
+	POPAD		; restore all gp registers
+	POP EBP
+	RET 20
 displayList ENDP
 
 

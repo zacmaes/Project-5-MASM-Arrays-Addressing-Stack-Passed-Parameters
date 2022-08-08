@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/07/22 13:09:22
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/07/22 17:02:24
 <Project Five: Arrays, Addressing, Stack Passed Params     (  Page 1 - 1
 
 
@@ -192,12 +192,14 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/07/22 13:09:22
 
 
 				; ARRAY
- 00000169  000000C8 [		randArray			DWORD   ARRAYSIZE DUP(?)	; DUP declaration, empty Array of ARRAYSIZE 
+ 00000169  000000C8 [		randArray			DWORD   ARRAYSIZE DUP(?)	; DUP declaration, empty Array of ARRAYSIZE
 	    00000000
 	   ]
+ 00000489 000000C8		arrayLength			DWORD	LENGTHOF randArray  ; save length of randArray
+ 0000048D 00000004		arrayType			DWORD   TYPE randArray		; save type size of randArray values
 
 				; FAREWELL DATA
- 00000489 49 66 20 79 6F	farewell_1          BYTE    "If you have made it this far, congratulations! Thanks for reading my program, goodbye!",0
+ 00000491 49 66 20 79 6F	farewell_1          BYTE    "If you have made it this far, congratulations! Thanks for reading my program, goodbye!",0
 	   75 20 68 61 76
 	   65 20 6D 61 64
 	   65 20 69 74 20
@@ -225,42 +227,37 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/07/22 13:09:22
 					
  00000005  68 00000000 R		PUSH OFFSET greeting		 ; offset +4
  0000000A  68 00000052 R		PUSH OFFSET description_1    ; offset +4
- 0000000F  E8 0000006C			CALL introduction			 ; return address +4
+ 0000000F  E8 00000084			CALL introduction			 ; return address +4
 
  00000014  68 00000169 R		PUSH OFFSET randArray        ; pass address of element 1 in randArray
  00000019  68 000000C8			PUSH ARRAYSIZE
  0000001E  6A 0F			PUSH LO
  00000020  6A 32			PUSH HI
- 00000022  E8 00000086			CALL fillArray
+ 00000022  E8 0000009E			CALL fillArray
 
-					; TEST DISPLAY IN MAIN---DELETE THIS
- 00000027  E8 00000000 E		CALL CrLf
- 0000002C  BE 00000169 R		MOV  ESI, OFFSET randArray
- 00000031  B9 000000C8			MOV  ECX, LENGTHOF randArray
- 00000036				_PrintArrTest:
- 00000036  8B 06				MOV EAX, [ESI]
- 00000038  E8 00000000 E			CALL WriteDec
-
- 0000003D  BA 00000167 R			MOV EDX, OFFSET one_space
- 00000042  E8 00000000 E			CALL WriteString
-
- 00000047  83 C6 04				ADD ESI, 4
-						
- 0000004A  E2 EA				LOOP _PrintArrTest
- 0000004C  E8 00000000 E		CALL CrLf
-
- 00000051  68 000000BA R		PUSH OFFSET unsorted_message ; offset +4
- 00000056  E8 0000007B			CALL displayList			 ; displayList 1st call for unsorted
+ 00000027  68 00000167 R		PUSH OFFSET one_space		; push the space string
+ 0000002C  68 000000BA R		PUSH OFFSET unsorted_message ; offset +4
+ 00000031  68 00000169 R		PUSH OFFSET randArray
+ 00000036  FF 35 00000489 R		PUSH arrayLength
+ 0000003C  FF 35 0000048D R		PUSH arrayType
+ 00000042  E8 000000A7			CALL displayList			 ; displayList 1st call for unsorted
 
 
 
 				;	CALL sortList
+ 00000047  68 00000167 R		PUSH OFFSET one_space		; push the space string
+ 0000004C  68 000000F8 R		PUSH OFFSET sorted_message   ; offset +4
+ 00000051  68 00000169 R		PUSH OFFSET randArray
+ 00000056  FF 35 00000489 R		PUSH arrayLength
+ 0000005C  FF 35 0000048D R		PUSH arrayType
+ 00000062  E8 00000087			CALL displayList			 ; displayList 2nd call for sorted
 
- 0000005B  68 000000F8 R		PUSH OFFSET sorted_message   ; offset +4
- 00000060  E8 00000071			CALL displayList			 ; displayList 2nd call for sorted
-
- 00000065  68 00000114 R		PUSH OFFSET list_message     ; offset +4
- 0000006A  E8 00000067			CALL displayList		     ; displayList 3rd call for list_message
+ 00000067  68 00000167 R		PUSH OFFSET one_space		; push the space string
+ 0000006C  68 00000114 R		PUSH OFFSET list_message     ; offset +4
+ 00000071  68 00000169 R		PUSH OFFSET randArray			; ****** THIS WILL NEED TO BE CHANGED TO THE NUMS LIST EVENTUALLY *****
+ 00000076  FF 35 00000489 R		PUSH arrayLength
+ 0000007C  FF 35 0000048D R		PUSH arrayType
+ 00000082  E8 00000067			CALL displayList		     ; displayList 3rd call for list_message
 
 				;  OTHER REQUIRED PROCS
 				;	CALL exchangeElements
@@ -268,13 +265,13 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/07/22 13:09:22
 				;	CALL displayList			; this procedure is called 3 times to display the various arrays
 				;	CALL countList
 
- 0000006F  68 00000489 R	    PUSH OFFSET farewell_1	;offset +4
- 00000074  E8 00000078			CALL farewell			; My additional procedure, stack return address +4
+ 00000087  68 00000491 R	    PUSH OFFSET farewell_1	;offset +4
+ 0000008C  E8 00000092			CALL farewell			; My additional procedure, stack return address +4
 
 					Invoke ExitProcess,0	; exit to operating system
- 00000079  6A 00	   *	    push   +000000000h
- 0000007B  E8 00000000 E   *	    call   ExitProcess
- 00000080			main ENDP
+ 00000091  6A 00	   *	    push   +000000000h
+ 00000093  E8 00000000 E   *	    call   ExitProcess
+ 00000098			main ENDP
 				; (insert additional procedures here)
 
 				; ---------------------------------------------------------------------------------
@@ -291,28 +288,28 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/07/22 13:09:22
 				; Returns:
 				; ---------------------------------------------------------------------------------
 
- 00000080			introduction PROC
+ 00000098			introduction PROC
 					; Set up Base pointer
- 00000080  55				PUSH EBP		; +4
- 00000081  8B EC			MOV  EBP, ESP	; Base Pointer
- 00000083  52				PUSH EDX
+ 00000098  55				PUSH EBP		; +4
+ 00000099  8B EC			MOV  EBP, ESP	; Base Pointer
+ 0000009B  52				PUSH EDX
 					; ...
 
- 00000084  8B 55 0C			MOV  EDX, [EBP+12] 
- 00000087  E8 00000000 E		CALL WriteString
- 0000008C  E8 00000000 E		CALL CrLf
- 00000091  E8 00000000 E		CALL CrLf
+ 0000009C  8B 55 0C			MOV  EDX, [EBP+12] 
+ 0000009F  E8 00000000 E		CALL WriteString
+ 000000A4  E8 00000000 E		CALL CrLf
+ 000000A9  E8 00000000 E		CALL CrLf
 
- 00000096  8B 55 08			MOV  EDX, [EBP+8]
- 00000099  E8 00000000 E		CALL WriteString
- 0000009E  E8 00000000 E		CALL CrLf
- 000000A3  E8 00000000 E		CALL CrLf
+ 000000AE  8B 55 08			MOV  EDX, [EBP+8]
+ 000000B1  E8 00000000 E		CALL WriteString
+ 000000B6  E8 00000000 E		CALL CrLf
+ 000000BB  E8 00000000 E		CALL CrLf
 
 					;...
- 000000A8  5A				POP EDX
- 000000A9  5D				POP EBP
- 000000AA  C2 0008			RET 8
- 000000AD			introduction ENDP
+ 000000C0  5A				POP EDX
+ 000000C1  5D				POP EBP
+ 000000C2  C2 0008			RET 8
+ 000000C5			introduction ENDP
 
 				; ---------------------------------------------------------------------------------
 				; Name: fillArray
@@ -328,39 +325,39 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/07/22 13:09:22
 				; Returns:
 				; ---------------------------------------------------------------------------------
 
- 000000AD			fillArray PROC
+ 000000C5			fillArray PROC
 					; Set up Base pointer
- 000000AD  55				PUSH EBP		; +4
- 000000AE  8B EC			MOV  EBP, ESP	; Base Pointer
+ 000000C5  55				PUSH EBP		; +4
+ 000000C6  8B EC			MOV  EBP, ESP	; Base Pointer
 
- 000000B0  50				PUSH EAX        ; Preserve used registers
- 000000B1  51				PUSH ECX
- 000000B2  57				PUSH EDI
+ 000000C8  50				PUSH EAX        ; Preserve used registers
+ 000000C9  51				PUSH ECX
+ 000000CA  57				PUSH EDI
 					; ...
- 000000B3  8B 4D 10			MOV  ECX, [EBP+16] ; List length into ECX
- 000000B6  8B 7D 14			MOV  EDI, [EBP+20] ; Address of list into EDI
+ 000000CB  8B 4D 10			MOV  ECX, [EBP+16] ; List length into ECX
+ 000000CE  8B 7D 14			MOV  EDI, [EBP+20] ; Address of list into EDI
 
 					;...LOOP...
- 000000B9				_fillLoop:
+ 000000D1				_fillLoop:
 						; GENERATE RANDOM NUM
- 000000B9  8B 45 08				MOV EAX, [EBP+8]  ; HI from stack into EAX
- 000000BC  2B 45 0C				SUB EAX, [EBP+12] ; HI - LO
- 000000BF  40					INC EAX			  ; add 1 to EAX to get upper limit(exclusive) for randomRange	
- 000000C0  E8 00000000 E			CALL RandomRange  ; generates 0 - EAX (exclusive), saves random val in EAX
- 000000C5  03 45 0C				ADD EAX, [EBP+12] ; Add LO value to EAX random num to get random within HI-LO range
+ 000000D1  8B 45 08				MOV EAX, [EBP+8]  ; HI from stack into EAX
+ 000000D4  2B 45 0C				SUB EAX, [EBP+12] ; HI - LO
+ 000000D7  40					INC EAX			  ; add 1 to EAX to get upper limit(exclusive) for randomRange	
+ 000000D8  E8 00000000 E			CALL RandomRange  ; generates 0 - EAX (exclusive), saves random val in EAX
+ 000000DD  03 45 0C				ADD EAX, [EBP+12] ; Add LO value to EAX random num to get random within HI-LO range
 
 						; FILL ARRAY
- 000000C8  89 07				MOV [EDI], EAX	  ; overwrite value in memory pointed to by EDI
- 000000CA  83 C7 04				ADD EDI, 4		  ; Hardcoded 4 (DWORD) to increment to next index in Array
- 000000CD  E2 EA				LOOP _fillLoop
+ 000000E0  89 07				MOV [EDI], EAX	  ; overwrite value in memory pointed to by EDI
+ 000000E2  83 C7 04				ADD EDI, 4		  ; Hardcoded 4 (DWORD) to increment to next index in Array
+ 000000E5  E2 EA				LOOP _fillLoop
 
 					;...
- 000000CF  5F				POP EDI
- 000000D0  59				POP ECX
- 000000D1  58				POP EAX
- 000000D2  5D				POP EBP
- 000000D3  C2 0010			RET 16
- 000000D6			fillArray ENDP
+ 000000E7  5F				POP EDI
+ 000000E8  59				POP ECX
+ 000000E9  58				POP EAX
+ 000000EA  5D				POP EBP
+ 000000EB  C2 0010			RET 16
+ 000000EE			fillArray ENDP
 
 				; ---------------------------------------------------------------------------------
 				; Name: displayList
@@ -376,25 +373,41 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/07/22 13:09:22
 				; Returns:
 				; ---------------------------------------------------------------------------------
 
- 000000D6			displayList PROC
+ 000000EE			displayList PROC
 					; Set up Base pointer
- 000000D6  55				PUSH EBP		; +4
- 000000D7  8B EC			MOV  EBP, ESP	; Base Pointer
- 000000D9  52				PUSH EDX        ; preserve edx
+ 000000EE  55				PUSH EBP		; +4
+ 000000EF  8B EC			MOV  EBP, ESP	; Base Pointer
+
+ 000000F1  60				PUSHAD			; preserve all gp registers
 					; ...
 
- 000000DA  8B 55 08			MOV  EDX, [EBP+8] 
- 000000DD  E8 00000000 E		CALL WriteString
- 000000E2  E8 00000000 E		CALL CrLf
- 000000E7  E8 00000000 E		CALL CrLf
+ 000000F2  8B 55 14			MOV  EDX, [EBP+20] ; Write the message string
+ 000000F5  E8 00000000 E		CALL WriteString
+ 000000FA  E8 00000000 E		CALL CrLf
 
 					; ...
 					; Display the list of ints here
 
- 000000EC  5A				POP	EDX
- 000000ED  5D				POP	EBP
- 000000EE  C2 0004			RET 4
- 000000F1			displayList ENDP
+					; TEST DISPLAY IN MAIN---DELETE THIS---THIS bWorks!!!
+ 000000FF  8B 75 10			MOV  ESI, [EBP+16]	; move randArray start ref to ESI
+ 00000102  8B 4D 0C			MOV  ECX, [EBP+12]	; move arrayLength to ECX
+ 00000105				_PrintArr:
+ 00000105  8B 06				MOV EAX, [ESI]
+ 00000107  E8 00000000 E			CALL WriteDec
+
+ 0000010C  8B 55 18				MOV EDX, [EBP+24]	; wrtie the one_space string
+ 0000010F  E8 00000000 E			CALL WriteString
+
+ 00000114  03 75 08				ADD ESI, [EBP+8]
+						
+ 00000117  E2 EC				LOOP _PrintArr
+					
+ 00000119  E8 00000000 E		CALL CrLf
+
+ 0000011E  61				POPAD		; restore all gp registers
+ 0000011F  5D				POP EBP
+ 00000120  C2 0014			RET 20
+ 00000123			displayList ENDP
 
 
 
@@ -408,26 +421,26 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/07/22 13:09:22
 				; Postconditions:
 				;
 				; Receives:
-				;
+;
 				; Returns:
 				; ---------------------------------------------------------------------------------
 
- 000000F1			farewell PROC
+ 00000123			farewell PROC
 					; Set up Base pointer
- 000000F1  55				PUSH EBP		; +4
- 000000F2  8B EC			MOV  EBP, ESP	; Base Pointer
- 000000F4  52				PUSH EDX        ; preserve edx
+ 00000123  55				PUSH EBP		; +4
+ 00000124  8B EC			MOV  EBP, ESP	; Base Pointer
+ 00000126  52				PUSH EDX        ; preserve edx
 					; ...
 
- 000000F5  8B 55 08			MOV  EDX, [EBP+8] 
- 000000F8  E8 00000000 E		CALL WriteString
- 000000FD  E8 00000000 E		CALL CrLf
- 00000102  E8 00000000 E		CALL CrLf
+ 00000127  8B 55 08			MOV  EDX, [EBP+8] 
+ 0000012A  E8 00000000 E		CALL WriteString
+ 0000012F  E8 00000000 E		CALL CrLf
+ 00000134  E8 00000000 E		CALL CrLf
 
- 00000107  5A				POP	EDX
- 00000108  5D				POP	EBP
- 00000109  C2 0004			RET 4
- 0000010C			farewell ENDP
+ 00000139  5A				POP	EDX
+ 0000013A  5D				POP	EBP
+ 0000013B  C2 0004			RET 4
+ 0000013E			farewell ENDP
 
 				END main
 
@@ -444,7 +457,7 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/07/22 13:09:22
 				;             a_list[pos + 1] = a_list[pos]
 				;             pos -= 1
 				;         a_list[pos + 1] = value
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/07/22 13:09:22
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/07/22 17:02:24
 <Project Five: Arrays, Addressing, Stack Passed Params     (  Symbols 2 - 1
 
 
@@ -538,8 +551,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000004E0 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000010C Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000004E8 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000013E Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -646,13 +659,13 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayList  . . . . . . . . . .	P Near	 000000D6 _TEXT	Length= 0000001B Public STDCALL
-farewell . . . . . . . . . . . .	P Near	 000000F1 _TEXT	Length= 0000001B Public STDCALL
-fillArray  . . . . . . . . . . .	P Near	 000000AD _TEXT	Length= 00000029 Public STDCALL
-  _fillLoop  . . . . . . . . . .	L Near	 000000B9 _TEXT	
-introduction . . . . . . . . . .	P Near	 00000080 _TEXT	Length= 0000002D Public STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000080 Public STDCALL
-  _PrintArrTest  . . . . . . . .	L Near	 00000036 _TEXT	
+displayList  . . . . . . . . . .	P Near	 000000EE _TEXT	Length= 00000035 Public STDCALL
+  _PrintArr  . . . . . . . . . .	L Near	 00000105 _TEXT	
+farewell . . . . . . . . . . . .	P Near	 00000123 _TEXT	Length= 0000001B Public STDCALL
+fillArray  . . . . . . . . . . .	P Near	 000000C5 _TEXT	Length= 00000029 Public STDCALL
+  _fillLoop  . . . . . . . . . .	L Near	 000000D1 _TEXT	
+introduction . . . . . . . . . .	P Near	 00000098 _TEXT	Length= 0000002D Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000098 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -874,13 +887,15 @@ VK_UP  . . . . . . . . . . . . .	Number	 00000026h
 WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h   
 WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
 WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
+arrayLength  . . . . . . . . . .	DWord	 00000489 _DATA	
+arrayType  . . . . . . . . . . .	DWord	 0000048D _DATA	
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 description_1  . . . . . . . . .	Byte	 00000052 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-farewell_1 . . . . . . . . . . .	Byte	 00000489 _DATA	
+farewell_1 . . . . . . . . . . .	Byte	 00000491 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
 greeting . . . . . . . . . . . .	Byte	 00000000 _DATA	
