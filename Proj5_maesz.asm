@@ -8,6 +8,22 @@ TITLE Project Five: Arrays, Addressing, Stack Passed Params     (Proj5_maesz.asm
 ; Description: 
 
 
+
+; DELETE THIS!!!
+; EXAMPLE PYTHON INSERTION SORT
+; def insertion_sort(a_list):
+;     """
+;     Insertion sort algorithm that sorts a_list in ascending order.
+;     """
+;     for index in range(1, len(a_list)):
+;         value = a_list[index]
+;         pos = index - 1
+;         while pos >= 0 and a_list[pos] > value:
+;             a_list[pos + 1] = a_list[pos]
+;             pos -= 1
+;         a_list[pos + 1] = value
+
+
 ; PROGRAM DESCRIPTION FROM CANVAS
 
 ; 1. Introduce the program
@@ -102,10 +118,12 @@ list_message        BYTE    "Your list of instances of each generated number, st
 one_space           BYTE    " ",0
 
 
-; ARRAY
+; ARRAYS
 randArray			DWORD   ARRAYSIZE DUP(?)	; DUP declaration, empty Array of ARRAYSIZE
 arrayLength			DWORD	LENGTHOF randArray  ; save length of randArray
 arrayType			DWORD   TYPE randArray		; save type size of randArray values
+
+countsArray         DWORD   (HI - LO + 1) DUP(?) ; set up counts array to store the final counted elements
 
 ; FAREWELL DATA
 farewell_1          BYTE    "If you have made it this far, congratulations! Thanks for reading my program, goodbye!",0
@@ -142,7 +160,8 @@ main PROC
 
 	; ---
 
-;	CALL sortList
+	PUSH randArray
+	CALL sortList
 
 	; ---
 
@@ -317,6 +336,88 @@ displayList PROC
 displayList ENDP
 
 
+; ---------------------------------------------------------------------------------
+; Name: sortList
+;
+; Description: 
+;
+; Preconditions: 
+;
+; Postconditions:
+;
+; Receives:
+;
+; Returns:
+; ---------------------------------------------------------------------------------
+
+sortList PROC
+	; Set up Base pointer
+	PUSH EBP		; +4
+	MOV  EBP, ESP	; Base Pointer
+	
+	PUSHAD			; preserve registers
+	; ...
+
+	MOV ESI, OFFSET [EBP+8] ; address of first element of randArray into ESI
+	MOV ECX, ARRAYSIZE      ; number of elements of randArray into ECX for decrementing the loop iteration counter
+
+	_arrayLoop: ; for index in range(1, len(a_list))
+
+	LOOP _arrayLoop
+	; CALL exchangeElements
+
+	
+; DELETE THIS!!!
+; EXAMPLE PYTHON INSERTION SORT
+; def insertion_sort(a_list):
+;     """
+;     Insertion sort algorithm that sorts a_list in ascending order.
+;     """
+;     for index in range(1, len(a_list)):
+;         value = a_list[index]
+;         pos = index - 1
+;         while pos >= 0 and a_list[pos] > value:
+;             a_list[pos + 1] = a_list[pos]
+;             pos -= 1
+;         a_list[pos + 1] = value
+
+	POPAD
+
+	POP	EBP
+	RET 4
+sortList ENDP
+
+; ---------------------------------------------------------------------------------
+; Name: exchangeElements
+;
+; Description: 
+;
+; Preconditions: 
+;
+; Postconditions:
+;
+; Receives:
+;
+; Returns:
+; ---------------------------------------------------------------------------------
+
+exchangeElements PROC
+	; Set up Base pointer
+	;PUSH EBP		; +4
+	;MOV  EBP, ESP	; Base Pointer
+	
+	; ...
+
+
+
+
+
+	
+	;POP	EBP
+	;RET
+exchangeElements ENDP
+
+
 
 ; ---------------------------------------------------------------------------------
 ; Name: farewell
@@ -351,16 +452,3 @@ farewell ENDP
 
 END main
 
-; DELETE THIS!!!
-; EXAMPLE PYTHON INSERTION SORT
-; def insertion_sort(a_list):
-;     """
-;     Insertion sort algorithm that sorts a_list in ascending order.
-;     """
-;     for index in range(1, len(a_list)):
-;         value = a_list[index]
-;         pos = index - 1
-;         while pos >= 0 and a_list[pos] > value:
-;             a_list[pos + 1] = a_list[pos]
-;             pos -= 1
-;         a_list[pos + 1] = value
