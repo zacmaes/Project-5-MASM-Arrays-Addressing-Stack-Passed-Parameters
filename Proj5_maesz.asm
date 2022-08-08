@@ -358,12 +358,33 @@ sortList PROC
 	PUSHAD			; preserve registers
 	; ...
 
-	MOV ESI, OFFSET [EBP+8] ; address of first element of randArray into ESI
 	MOV ECX, ARRAYSIZE      ; number of elements of randArray into ECX for decrementing the loop iteration counter
 
-	_arrayLoop: ; for index in range(1, len(a_list))
+	_arrayLoop:
+		PUSH ECX			; save register for loop count
+		MOV EDI, OFFSET [EBP+8] ; address of first element of randArray into EDI [or next incremented element after loop]
 
-	LOOP _arrayLoop
+		_innerLoop:
+			MOV EAX, [EDI]     ; move array element at EDI pointer to EAX register
+			CMP [EDI+4], EAX   ; compare next index to previous index at this iteration of the bubble sort
+			JGE _noExchange	   ; next is greater than or equal to previous so there is no exchage of values
+
+
+		_noExchange:
+			ADD EDI, 4			; increment EDI pointer
+			LOOP _innerLoop
+
+			POP ECX				; pop the _arrayLoop counter out of the stack
+			LOOP _arrayLoop
+
+
+		 
+
+
+
+		MOV 
+
+		LOOP _arrayLoop
 	; CALL exchangeElements
 
 	
