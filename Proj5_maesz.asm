@@ -160,7 +160,7 @@ main PROC
 
 	; ---
 
-	PUSH randArray
+	PUSH OFFSET randArray
 	CALL sortList
 
 	; ---
@@ -362,12 +362,16 @@ sortList PROC
 
 	_arrayLoop:
 		PUSH ECX			; save register for loop count
-		MOV EDI, OFFSET [EBP+8] ; address of first element of randArray into EDI [or next incremented element after loop]
+		MOV EDI, [EBP+8] ; address of first element of randArray into EDI [or next incremented element after loop]
 
 		_innerLoop:
 			MOV EAX, [EDI]     ; move array element at EDI pointer to EAX register
 			CMP [EDI+4], EAX   ; compare next index to previous index at this iteration of the bubble sort
 			JGE _noExchange	   ; next is greater than or equal to previous so there is no exchage of values
+			; CALL exchangeElements
+			XCHG EAX, [EDI+4]
+			MOV [EDI], EAX
+
 
 
 		_noExchange:
@@ -376,31 +380,6 @@ sortList PROC
 
 			POP ECX				; pop the _arrayLoop counter out of the stack
 			LOOP _arrayLoop
-
-
-		 
-
-
-
-		MOV 
-
-		LOOP _arrayLoop
-	; CALL exchangeElements
-
-	
-; DELETE THIS!!!
-; EXAMPLE PYTHON INSERTION SORT
-; def insertion_sort(a_list):
-;     """
-;     Insertion sort algorithm that sorts a_list in ascending order.
-;     """
-;     for index in range(1, len(a_list)):
-;         value = a_list[index]
-;         pos = index - 1
-;         while pos >= 0 and a_list[pos] > value:
-;             a_list[pos + 1] = a_list[pos]
-;             pos -= 1
-;         a_list[pos + 1] = value
 
 	POPAD
 
@@ -422,7 +401,7 @@ sortList ENDP
 ; Returns:
 ; ---------------------------------------------------------------------------------
 
-exchangeElements PROC
+;exchangeElements PROC
 	; Set up Base pointer
 	;PUSH EBP		; +4
 	;MOV  EBP, ESP	; Base Pointer
@@ -436,7 +415,7 @@ exchangeElements PROC
 	
 	;POP	EBP
 	;RET
-exchangeElements ENDP
+;exchangeElements ENDP
 
 
 
