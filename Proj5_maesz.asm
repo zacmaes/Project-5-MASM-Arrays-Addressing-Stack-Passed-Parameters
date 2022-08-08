@@ -531,7 +531,46 @@ countList PROC
 	PUSHAD        ; preserve registers
 	; ...
 
-	
+
+
+	MOV ECX, ARRAYSIZE	; loop counter to arraysize
+	MOV ESI, [EBP+8]	; pointer to start of countsArray index0
+	MOV EDI, [EBP+12]   ; pointer to start of randArray index0
+	MOV EAX, [EDI]		; copy first array value at EDI pointer to EAX
+	MOV EBX, 0 ; count for index of randArray
+	MOV EDX, LO ; register
+
+	; not handling if a value at lo (or later on)... need to account for if values have zero instances
+	_checkZeros:
+		CMP [EDI], EDX
+		JNE _isZero
+
+	_isZero:
+		MOV [ESI], EBX	
+		ADD ESI, 4
+		ADD EDX, 1
+
+
+
+
+ ; not incorporated into above yet... fix this
+
+	_countsLoop:
+		CMP [EDI], EAX
+		JE	 _sameVal
+		JNE  _diffVal
+		
+
+		_sameVal:
+			ADD EBX, 1
+			JMP _countsEnd
+
+		_diffVal:
+			MOV 
+
+		_countsEnd:
+			ADD EDI, 4
+			LOOP _countsLoop
 
 	POPAD
 	POP	EBP
