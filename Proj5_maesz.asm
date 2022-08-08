@@ -10,18 +10,17 @@ TITLE Project Five: Arrays, Addressing, Stack Passed Params     (Proj5_maesz.asm
 
 
 ; DELETE THIS!!!
-; EXAMPLE PYTHON INSERTION SORT
-; def insertion_sort(a_list):
-;     """
-;     Insertion sort algorithm that sorts a_list in ascending order.
-;     """
-;     for index in range(1, len(a_list)):
-;         value = a_list[index]
-;         pos = index - 1
-;         while pos >= 0 and a_list[pos] > value:
-;             a_list[pos + 1] = a_list[pos]
-;             pos -= 1
-;         a_list[pos + 1] = value
+; EXAMPLE PYTHON BUBBLE SORT
+;def bubble_sort(a_list):
+    ;"""
+    ;Bubble sort algorithm that sorts a_list in ascending order.
+    ;"""
+    ;for pass_num in range(len(a_list) - 1):
+    ;    for index in range(len(a_list) - 1 - pass_num):
+       ;     if a_list[index] > a_list[index + 1]:
+     ;           temp = a_list[index]
+     ;           a_list[index] = a_list[index + 1]
+     ;           a_list[index + 1] = temp
 
 
 ; PROGRAM DESCRIPTION FROM CANVAS
@@ -97,7 +96,7 @@ INCLUDE Irvine32.inc
 ; (insert macro definitions here)
 ; (insert constant definitions here)
 
-ARRAYSIZE = 200
+ARRAYSIZE = 21
 LO        = 15
 HI        = 50
 
@@ -171,6 +170,11 @@ main PROC
 	PUSH arrayLength
 	PUSH arrayType
 	CALL displayList			 ; displayList 2nd call for sorted
+
+	; ---
+	PUSH OFFSET median_message
+	PUSH OFFSET randArray
+	CALL displayMedian
 
 	; ---
 
@@ -340,6 +344,20 @@ displayList ENDP
 ; Name: sortList
 ;
 ; Description: 
+
+; DELETE THIS!!!
+; EXAMPLE PYTHON BUBBLE SORT
+;def bubble_sort(a_list):
+    ;"""
+    ;Bubble sort algorithm that sorts a_list in ascending order.
+    ;"""
+    ;for pass_num in range(len(a_list) - 1):
+    ;    for index in range(len(a_list) - 1 - pass_num):
+       ;     if a_list[index] > a_list[index + 1]:
+     ;           temp = a_list[index]
+     ;           a_list[index] = a_list[index + 1]
+     ;           a_list[index + 1] = temp
+
 ;
 ; Preconditions: 
 ;
@@ -416,6 +434,77 @@ sortList ENDP
 	;POP	EBP
 	;RET
 ;exchangeElements ENDP
+
+
+; ---------------------------------------------------------------------------------
+; Name: displayMedian
+;
+; Description: 
+;
+; Preconditions: 
+;
+; Postconditions:
+;
+; Receives:
+;
+; Returns:
+; ---------------------------------------------------------------------------------
+
+displayMedian PROC
+	; Set up Base pointer
+	PUSH EBP		; +4
+	MOV  EBP, ESP	; Base Pointer
+	
+	PUSHAD
+	; ...
+
+	MOV  EDX, [EBP+12] 
+	CALL WriteString
+
+	; ---
+	; DIV instruction [EDX:EAX / EBX] ==> (EAX = Quotient) and (EDX = Remainder)
+	MOV EAX, ARRAYSIZE		; Set low dividend
+	MOV EDX, 0				; Clear the high dividend
+	MOV EBX, 2				; Divide EDX:EAX by 2
+	DIV EBX					; (EAX = Quotient) and (EDX = Remainder)
+
+	CMP EDX, 0
+	JE  _even
+	JG  _odd
+
+	_even:		; IF remainder is 0 (even)
+		; DO SOMETHING HERE
+		JMP _final
+
+	_odd:		; IF remainder is not 0 (odd)
+		; Example: ARRAYSIZE = 21, 21/2 has remainder > 0
+		;	-add 1 to arraysize (use arraysize in register first)
+		;	-divide arraysize+1 by 2 to get the median index position
+		;   -print the median index from the list
+		MOV ECX, EAX
+		MOV EDI, [EBP+8]
+		_oddLoop:
+			ADD EDI, 4
+			LOOP _oddLoop
+		JMP _final
+
+
+
+
+	_final:
+		MOV EAX, [EDI]
+		CALL WriteDec
+		CALL CrLf
+	
+	; ---
+
+	CALL CrLf
+	POPAD
+	POP	EBP
+	RET 8
+displayMedian ENDP
+
+
 
 
 
