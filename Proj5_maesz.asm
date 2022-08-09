@@ -262,15 +262,29 @@ fillArray ENDP
 ; ---------------------------------------------------------------------------------
 ; Name: displayList
 ;
-; Description: 
+; Description: This procedure is called on three separate ocassions. It prints a passed 
+;	  parameter string. It then iterates through a passed array parameter, printing out 
+;     the current item in the array followed by a space. This repets for all elements 
+;     in the array. 
 ;
 ; Preconditions: 
+;	 -randArray must be filled prior to the first displayList call.
+;	 -randArray must be sorted prior to the second displayList call.
+;	 -countsArray must be filled prior to the third displayList call.
+;	 -countsArrLen must be declared in .data with the LENGTHOF operator
 ;
-; Postconditions:
+; Postconditions: N/A
 ;
 ; Receives:
+;    [EBP+20] = OFFSET reference of one_space string in memory
+;	 [EBP+16] = OFFSET reference of variable string message in memory
+;					[1st. unsorted_message // 2nd. sorted_message // 3rd. list_message]
+;	 [EBP+12] = OFFSET reference of variable array in memory
+;					[1st. randArray // 2nd. randArry // 3rd. countsArray]
+;    [EBP+8]  = pushed length of array. [ARRAYSIZE or countsArrLen]
 ;
 ; Returns:
+;    -No specific returns other than writing strings and decimals to the terminal.
 ; ---------------------------------------------------------------------------------
 
 displayList PROC
