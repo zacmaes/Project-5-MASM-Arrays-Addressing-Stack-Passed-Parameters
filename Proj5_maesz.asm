@@ -96,7 +96,7 @@ INCLUDE Irvine32.inc
 ; (insert macro definitions here)
 ; (insert constant definitions here)
 
-ARRAYSIZE = 21
+ARRAYSIZE = 30
 LO        = 15
 HI        = 50
 
@@ -214,6 +214,7 @@ main ENDP
 ; Name: introduction
 ;
 ; Description: 
+; Introduces the 
 ;
 ; Preconditions: 
 ;
@@ -476,28 +477,61 @@ displayMedian PROC
 
 	_even:		; IF remainder is 0 (even)
 		; DO SOMETHING HERE
-		JMP _final
+		; EAX is the left middle, at this point
+		
+		MOV ECX, EAX ;set loop count for lower mid index in eax to ecx
+		MOV EDI, [EBP+8]
+		_evenLoop1:
+			ADD EDI, 4
+			LOOP _evenLoop1
+	
+		
+		MOV EAX, [EDI]
+		_evensDiv:
+			ADD EAX, [EDI+4]
+			MOV EDX, 0
+			MOV EBX, 2
+			DIV EBX		
+		
+		CMP EDX, 0			; if even--> eax is the quotient and median val, if odd--> add 1 before div and follow even rules after div
+		JE  _finalEven
+		JNE _addOneAndDivAgain
+
+		_addOneAndDivAgain:
+			MOV EAX, [EDI]
+			ADD EAX, 1
+			JMP _evensDiv
+
+		_finalEven:
+			CALL WriteDec
+			CALL CrLf
+			JMP _evenDone
+
+			
+	
+
+
+			;JMP _final
 
 	_odd:		; IF remainder is not 0 (odd)
 		; Example: ARRAYSIZE = 21, 21/2 has remainder > 0
 		;	-add 1 to arraysize (use arraysize in register first)
 		;	-divide arraysize+1 by 2 to get the median index position
 		;   -print the median index from the list
-		MOV ECX, EAX
+		MOV ECX, EAX     ; set loop counter
 		MOV EDI, [EBP+8]
 		_oddLoop:
 			ADD EDI, 4
 			LOOP _oddLoop
-		JMP _final
+		JMP _finalOdd
 
 
-
-
-	_final:
+	_finalOdd:
 		MOV EAX, [EDI]
 		CALL WriteDec
 		CALL CrLf
 	
+	_evenDone:
 	; ---
 
 	CALL CrLf
