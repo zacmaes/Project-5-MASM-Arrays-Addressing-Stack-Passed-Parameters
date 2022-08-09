@@ -104,10 +104,8 @@ HI        = 50
 ; (insert variable definitions here)
 
 ;INTRODUCTION DATA
-greeting		BYTE	"Welcome to Project Five: Arrays, Addressing, Stack Passed Params by Zachary Maes!",0
-description_1   BYTE	"This program will do something akin to magic... The programmer WILL CHANGE THIS DESCRIPTION LATER ON!!!",0
-
-
+greeting		    BYTE	"Welcome to Project Five: Arrays, Addressing, Stack Passed Params by Zachary Maes!",0
+description_1       BYTE	"This program will do something akin to magic... The programmer WILL CHANGE THIS DESCRIPTION LATER ON!!!",0
 
 ; DISPLAY DATA
 unsorted_message    BYTE    "Your unsorted random numbers:",0
@@ -116,97 +114,65 @@ sorted_message      BYTE    "Your sorted random numbers:",0
 list_message        BYTE    "Your list of instances of each generated number, starting with the smallest value:",0
 one_space           BYTE    " ",0
 
-
 ; ARRAYS
-randArray			DWORD   ARRAYSIZE DUP(?)	; DUP declaration, empty Array of ARRAYSIZE
-arrayLength			DWORD	LENGTHOF randArray  ; save length of randArray
+randArray			DWORD   ARRAYSIZE DUP(?)	    ; DUP declaration, empty Array of ARRAYSIZE
+arrayLength			DWORD	LENGTHOF randArray      ; save length of randArray
 
-countsArray         DWORD   (HI - LO + 1) DUP(?) ; set up counts array to store the final counted elements
-countsArrLen		DWORD	LENGTHOF countsArray ; length of the the counts array for use in loop.
+countsArray         DWORD   (HI - LO + 1) DUP(?)    ; set up counts array to store the final counted elements
+countsArrLen		DWORD	LENGTHOF countsArray    ; length of the the counts array for use in loop.
 
 ; FAREWELL DATA
 farewell_1          BYTE    "If you have made it this far, congratulations! Thanks for reading my program, goodbye!",0
 
-
-
 .code
 main PROC
 ; (insert executable instructions here)
-	CALL Randomize				 ; Initialize starting seed vaue of RandomRange procedure
+	CALL Randomize				   ; Initialize starting seed vaue of RandomRange procedure
 
-	; ---
-	
-	PUSH OFFSET greeting		; push strings to stack
+	PUSH OFFSET greeting		   ; push strings to stack
 	PUSH OFFSET description_1    
 	CALL introduction			
 
-	; ---
-
-	PUSH OFFSET randArray        ; push address of randArray to stack
-	PUSH ARRAYSIZE				 ; push Constants to stack (REFACTOR THIS EVENTUALLY)
-	PUSH LO
-	PUSH HI
+	PUSH OFFSET randArray          ; push address of randArray to stack
 	CALL fillArray
 
-	; ---
-
-	PUSH OFFSET one_space		; push the space string
-	PUSH OFFSET unsorted_message ; offset +4
+	PUSH OFFSET one_space		   ; push the space string
+	PUSH OFFSET unsorted_message   ; offset +4
 	PUSH OFFSET randArray
 	PUSH ARRAYSIZE
-	; PUSH arrayType
-	CALL displayList			 ; displayList 1st call for unsorted
+	CALL displayList			   ; displayList 1st call for unsorted
 
-	; ---
-
-	PUSH OFFSET randArray
+	PUSH OFFSET randArray		   ; push address of randArray to stack
 	CALL sortList
 
-	; ---
-
-	PUSH OFFSET one_space		; push the space string
-	PUSH OFFSET sorted_message   ; offset +4
+	PUSH OFFSET one_space		   ; push the space string
+	PUSH OFFSET sorted_message     ; offset +4
 	PUSH OFFSET randArray
 	PUSH ARRAYSIZE
-	;PUSH arrayType
-	CALL displayList			 ; displayList 2nd call for sorted
-
-	; ---
+	CALL displayList			   ; displayList 2nd call for sorted
+	
 	PUSH OFFSET median_message
 	PUSH OFFSET randArray
 	CALL displayMedian
 
-	; ---
 	PUSH OFFSET randArray
 	PUSH OFFSET countsArray
 	PUSH countsArrLen
 	CALL countList
 
-
-	; ---
-
-	PUSH OFFSET one_space		; push the space string
-	PUSH OFFSET list_message     ; offset +4
-	PUSH OFFSET	countsArray			; ****** THIS WILL NEED TO BE CHANGED TO THE NUMS LIST EVENTUALLY *****
+	PUSH OFFSET one_space		   ; push the space string
+	PUSH OFFSET list_message       ; offset +4
+	PUSH OFFSET	countsArray		   
 	PUSH countsArrLen
-	;PUSH arrayType
-	CALL displayList		     ; displayList 3rd call for list_message
-
-	; ---
-
+	CALL displayList		       ; displayList 3rd call for list_message
 
 ;  OTHER REQUIRED PROCS
 ;	CALL exchangeElements
-;	CALL displayMedian
-;	CALL displayList			; this procedure is called 3 times to display the various arrays
-;	CALL countList
 
-	; ---
+    PUSH OFFSET farewell_1	    
+	CALL farewell			       ; My additional procedure, stack return address +4
 
-    PUSH OFFSET farewell_1	;offset +4
-	CALL farewell			; My additional procedure, stack return address +4
-
-	Invoke ExitProcess,0	; exit to operating system
+	Invoke ExitProcess,0	       ; exit to operating system
 main ENDP
 ; (insert additional procedures here)
 
@@ -229,11 +195,9 @@ main ENDP
 ; ---------------------------------------------------------------------------------
 
 introduction PROC
-	; Set up Base pointer
-	PUSH EBP		; +4
-	MOV  EBP, ESP	; Base Pointer
-	PUSH EDX
-	; ...
+	PUSH EBP	        ; Base Pointer	
+	MOV  EBP, ESP	
+	PUSH EDX			; Preserve EDX
 
 	MOV  EDX, [EBP+12] 
 	CALL WriteString
@@ -245,8 +209,7 @@ introduction PROC
 	CALL CrLf
 	CALL CrLf
 
-	;...
-	POP EDX
+	POP EDX   
 	POP EBP
 	RET 8
 introduction ENDP
@@ -255,43 +218,42 @@ introduction ENDP
 ; Name: fillArray
 ;
 ; This procedure uses a loop to generate random decimals and insert them into 
-;     an empty array.
+;     an empty array called randArray.
 ;
-; Preconditions: 
+; Preconditions: randArray must be declared in data as an empty array with 
+;     the ARRAYSIZE constant as its size and DWORD as its type.
 ;
-; Postconditions:
+; Postconditions: randArray will be filled with ARRAYSIZE number of decimals.
 ;
 ; Receives:
+;     [EBP+8] = offset reference to randArray
+;     LO, HI, and ARRAYSIZE used as globals
 ;
 ; Returns:
+;	  randArray
 ; ---------------------------------------------------------------------------------
 
 fillArray PROC
-	; Set up Base pointer
-	PUSH EBP		; +4
-	MOV  EBP, ESP	; Base Pointer
-
-	PUSHAD        ; Preserve used registers
+	PUSH EBP		      ; Base Pointer     
+	MOV  EBP, ESP	      
+	PUSHAD				  ; Preserve used registers
 	
-	; ...
-	MOV  ECX, [EBP+16] ; List length into ECX
-	MOV  EDI, [EBP+20] ; Address of list into EDI
+	MOV  ECX, ARRAYSIZE   ; ARRAYSIZE List length into ECX
+	MOV  EDI, [EBP+8]     ; Address of list into EDI
 
-	;...LOOP...
 	_fillLoop:
-		; GENERATE RANDOM NUM
-		MOV EAX, [EBP+8]  ; HI from stack into EAX
-		SUB EAX, [EBP+12] ; HI - LO
-		INC EAX			  ; add 1 to EAX to get upper limit(exclusive) for randomRange	
+	; GENERATE RANDOM DECIMAL
+		MOV  EAX, HI	  ; HI into EAX
+		SUB  EAX, LO      ; HI - LO
+		ADD  EAX, 1		  ; add 1 to EAX to get upper limit(exclusive) for randomRange	
 		CALL RandomRange  ; generates 0 - EAX (exclusive), saves random val in EAX
-		ADD EAX, [EBP+12] ; Add LO value to EAX random num to get random within HI-LO range
+		ADD  EAX, LO      ; Add LO value to EAX random num to get random within HI-LO range
 
-		; FILL ARRAY
+	; FILL ARRAY
 		MOV [EDI], EAX	  ; overwrite value in memory pointed to by EDI
-		ADD EDI, 4		  ; Hardcoded 4 (DWORD) to increment to next index in Array
+		ADD  EDI, 4		  ; Hardcoded 4 (DWORD) to increment to next index in Array
 		LOOP _fillLoop
 
-	;...
 	POPAD
 	POP EBP
 	RET 16
@@ -312,26 +274,22 @@ fillArray ENDP
 ; ---------------------------------------------------------------------------------
 
 displayList PROC
-	; Set up Base pointer
-	PUSH EBP		; +4
-	MOV  EBP, ESP	; Base Pointer
+	PUSH EBP		       ; Base Pointer
+	MOV  EBP, ESP	
+	PUSHAD			       ; preserve all gp registers
 
-	PUSHAD			; preserve all gp registers
-	; ...
-
-	MOV  EDX, [EBP+16] ; Write the message string
+	MOV  EDX, [EBP+16]     ; Write the message string
 	CALL WriteString
 	CALL CrLf
 
-	; ...
-	; Display the list of ints here
-	MOV  EDI, [EBP+12]	; move randArray start ref to EDI
-	MOV  ECX, [EBP+8]	; move ARRAYSIZE or countsArrLen to ECX counter
+	MOV  EDI, [EBP+12]	   ; move randArray start ref to EDI
+	MOV  ECX, [EBP+8]	   ; move ARRAYSIZE or countsArrLen to ECX counter
+	
 	_PrintArr:
 		MOV EAX, [EDI]
 		CALL WriteDec
 
-		MOV EDX, [EBP+20]	; wrtie the one_space string
+		MOV EDX, [EBP+20]  ; wrtie the one_space string
 		CALL WriteString
 
 		ADD EDI, 4
@@ -341,7 +299,7 @@ displayList PROC
 	CALL CrLf
 	CALL CrLf
 
-	POPAD		; restore all gp registers
+	POPAD		
 	POP EBP
 	RET 16
 displayList ENDP
@@ -376,38 +334,33 @@ displayList ENDP
 ; ---------------------------------------------------------------------------------
 
 sortList PROC
-	; Set up Base pointer
-	PUSH EBP		; +4
-	MOV  EBP, ESP	; Base Pointer
+	PUSH EBP		             ; Base Pointer
+	MOV  EBP, ESP	
+	PUSHAD			             ; preserve registers
+
+	MOV ECX, ARRAYSIZE           ; number of elements of randArray into ECX for decrementing the loop iteration counter
 	
-	PUSHAD			; preserve registers
-	; ...
-
-	MOV ECX, ARRAYSIZE      ; number of elements of randArray into ECX for decrementing the loop iteration counter
-
 	_arrayLoop:
-		PUSH ECX			; save register for loop count
-		MOV EDI, [EBP+8] ; address of first element of randArray into EDI [or next incremented element after loop]
-
+		PUSH ECX			     ; save register for loop count
+		MOV EDI, [EBP+8]         ; address of first element of randArray into EDI [or next incremented element after loop]
+		
 		_innerLoop:
-			MOV EAX, [EDI]     ; move array element at EDI pointer to EAX register
-			CMP [EDI+4], EAX   ; compare next index to previous index at this iteration of the bubble sort
-			JGE _noExchange	   ; next is greater than or equal to previous so there is no exchage of values
-			; CALL exchangeElements
+			MOV EAX, [EDI]       ; move array element at EDI pointer to EAX register
+			CMP [EDI+4], EAX     ; compare next index to previous index at this iteration of the bubble sort
+			JGE _noExchange	     ; next is greater than or equal to previous so there is no exchage of values
+			
+			; CALL exchangeElements {REFACTOR THIS!!!!!!!!!}
 			XCHG EAX, [EDI+4]
 			MOV [EDI], EAX
 
-
-
 		_noExchange:
-			ADD EDI, 4			; increment EDI pointer
+			ADD EDI, 4			 ; increment EDI pointer
 			LOOP _innerLoop
 
-			POP ECX				; pop the _arrayLoop counter out of the stack
+			POP ECX				 ; pop the _arrayLoop counter out of the stack
 			LOOP _arrayLoop
 
 	POPAD
-
 	POP	EBP
 	RET 4
 sortList ENDP
@@ -458,46 +411,40 @@ sortList ENDP
 ; ---------------------------------------------------------------------------------
 
 displayMedian PROC
-	; Set up Base pointer
-	PUSH EBP		; +4
-	MOV  EBP, ESP	; Base Pointer
-	
+	PUSH EBP		           ; Base Pointer
+	MOV  EBP, ESP	
 	PUSHAD
-	; ...
 
-	MOV  EDX, [EBP+12] 
+	MOV  EDX, [EBP+12]		   ; display message
 	CALL WriteString
 
-	; ---
-	; DIV instruction [EDX:EAX / EBX] ==> (EAX = Quotient) and (EDX = Remainder)
-	MOV EAX, ARRAYSIZE		; Set low dividend
-	MOV EDX, 0				; Clear the high dividend
-	MOV EBX, 2				; Divide EDX:EAX by 2
-	DIV EBX					; (EAX = Quotient) and (EDX = Remainder)
+	MOV  EAX, ARRAYSIZE		   ; Set low dividend =====> DIV instruction [EDX:EAX / EBX] ==> (EAX = Quotient) and (EDX = Remainder)
+	MOV  EDX, 0				   ; Clear the high dividend
+	MOV  EBX, 2				   ; Divide EDX:EAX by 2
+	DIV  EBX				   ; (EAX = Quotient) and (EDX = Remainder)
 
-	CMP EDX, 0
-	JE  _even
-	JG  _odd
+	CMP  EDX, 0
+	JE   _even
+	JG   _odd
 
-	_even:		; IF remainder is 0 (even)
-		; DO SOMETHING HERE
+	_even:		               ; IF remainder is 0 (even)
 		; EAX is the left middle, at this point
-		
-		MOV ECX, EAX ;set loop count for lower mid index in eax to ecx
+		MOV ECX, EAX           ;set loop count for lower mid index in eax to ecx
 		MOV EDI, [EBP+8]
+
 		_evenLoop1:
-			ADD EDI, 4
+			ADD  EDI, 4
 			LOOP _evenLoop1
-	
 		
 		MOV EAX, [EDI]
+
 		_evensDiv:
 			ADD EAX, [EDI+4]
 			MOV EDX, 0
 			MOV EBX, 2
 			DIV EBX		
 		
-		CMP EDX, 0			; if even--> eax is the quotient and median val, if odd--> add 1 before div and follow even rules after div
+		CMP EDX, 0			    ; if even--> eax is the quotient and median val, if odd--> add 1 before div and follow even rules after div
 		JE  _finalEven
 		JNE _addOneAndDivAgain
 
@@ -511,13 +458,8 @@ displayMedian PROC
 			CALL CrLf
 			JMP _evenDone
 
-			
-	
 
-
-			;JMP _final
-
-	_odd:		; IF remainder is not 0 (odd)
+	_odd:		    ; IF remainder is not 0 (odd)
 		; Example: ARRAYSIZE = 21, 21/2 has remainder > 0
 		;	-add 1 to arraysize (use arraysize in register first)
 		;	-divide arraysize+1 by 2 to get the median index position
