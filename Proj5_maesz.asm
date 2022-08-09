@@ -321,9 +321,9 @@ displayList ENDP
 
 ; ---------------------------------------------------------------------------------
 ; Name: sortList
-;
-; Description: 
 
+; Description: The sortList procedure will have a really ice description once it is completed
+; 
 ; DELETE THIS!!!
 ; EXAMPLE PYTHON BUBBLE SORT
 ;def bubble_sort(a_list):
@@ -442,7 +442,7 @@ displayMedian PROC
 	JG   _odd
 
 	_even:		               ; IF remainder is 0 (even)
-		; EAX is the left middle, at this point
+	; EAX is the left middle, at this point
 		MOV ECX, EAX           ;set loop count for lower mid index in eax to ecx
 		MOV EDI, [EBP+8]
 
@@ -503,33 +503,39 @@ displayMedian ENDP
 ; ---------------------------------------------------------------------------------
 ; Name: countList
 ;
-; Description: 
-;
+; Description: This procedure counts the number of instances of each decimal occurance
+;	within the randArray passed parameter. It is checking for all decimals in the given
+;   constant range of [LO to HI] inclusive. The count is then placed into the passed 
+;   countsList array (including counts of 0.)
+
 ; Preconditions: 
+;	-randArray must be filled first and also sorted in ascending order
+;   -empty countsArray must be declared to (HI-LO+1) length
+;   -countsArrLen must be declared with LENGTHOF countsArray
 ;
-; Postconditions:
+; Postconditions: N/A
 ;
 ; Receives:
+;	[EBP+16] = OFFSET reference to sorted randArray
+;	[EBP+12] = OFFSET reference to empty countsArray
+;	[EBP+8]  = countsArrLen variable
 ;
 ; Returns:
+;	-filled countsArray 
 ; ---------------------------------------------------------------------------------
 
 countList PROC
-	; Set up Base pointer
-	PUSH EBP		; +4
-	MOV  EBP, ESP	; Base Pointer
-	PUSHAD        ; preserve registers
-	; ...
+	PUSH EBP						; Base Pointer
+	MOV  EBP, ESP				
+	PUSHAD							; preserve registers
 
-
-
-	MOV ECX, [EBP+8]	; loop counter to countsArrLen
-	MOV EDI, [EBP+16]   ; pointer to start of randArray index0
-	MOV ESI, [EBP+12]	; pointer to start of countsArray index0
-	MOV EDX, LO			; holds Lo and increments up 
+	MOV ECX, [EBP+8]				; loop counter to countsArrLen
+	MOV EDI, [EBP+16]				; pointer to start of randArray index0
+	MOV ESI, [EBP+12]				; pointer to start of countsArray index0
+	MOV EDX, LO						; holds Lo and increments up 
 
 	_countsArrLoop:
-		MOV EBX, 0      ; value amount counter reset to 0
+		MOV EBX, 0					; value amount counter reset to 0
 		
 		_skipValReset:
 			CMP [EDI], EDX
@@ -537,15 +543,15 @@ countList PROC
 			JE  _sameValueHappened
 
 		_sameValueHappened:
-			ADD	EBX, 1	   ; add 1 to value counter
-			ADD EDI, 4     ; inc edi pointer
+			ADD	EBX, 1				; add 1 to value counter
+			ADD EDI, 4				; inc edi pointer
 			JMP _skipValReset
 
 		_inputValue:
 			MOV [ESI], EBX	
 			ADD ESI, 4
 			ADD EDX, 1
-			LOOP _countsArrLoop   ; dec ecx
+			LOOP _countsArrLoop     ; dec ecx
 
 	POPAD
 	POP	EBP
