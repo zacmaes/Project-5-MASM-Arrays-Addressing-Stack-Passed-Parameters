@@ -120,9 +120,9 @@ one_space           BYTE    " ",0
 ; ARRAYS
 randArray			DWORD   ARRAYSIZE DUP(?)	; DUP declaration, empty Array of ARRAYSIZE
 arrayLength			DWORD	LENGTHOF randArray  ; save length of randArray
-arrayType			DWORD   TYPE randArray		; save type size of randArray values
 
 countsArray         DWORD   (HI - LO + 1) DUP(?) ; set up counts array to store the final counted elements
+countsArrLen		DWORD	LENGTHOF countsArray ; length of the the counts array for use in loop.
 
 ; FAREWELL DATA
 farewell_1          BYTE    "If you have made it this far, congratulations! Thanks for reading my program, goodbye!",0
@@ -153,8 +153,8 @@ main PROC
 	PUSH OFFSET one_space		; push the space string
 	PUSH OFFSET unsorted_message ; offset +4
 	PUSH OFFSET randArray
-	PUSH arrayLength
-	PUSH arrayType
+	PUSH ARRAYSIZE
+	; PUSH arrayType
 	CALL displayList			 ; displayList 1st call for unsorted
 
 	; ---
@@ -167,8 +167,8 @@ main PROC
 	PUSH OFFSET one_space		; push the space string
 	PUSH OFFSET sorted_message   ; offset +4
 	PUSH OFFSET randArray
-	PUSH arrayLength
-	PUSH arrayType
+	PUSH ARRAYSIZE
+	;PUSH arrayType
 	CALL displayList			 ; displayList 2nd call for sorted
 
 	; ---
@@ -179,6 +179,7 @@ main PROC
 	; ---
 	PUSH OFFSET randArray
 	PUSH OFFSET countsArray
+	PUSH countsArrLen
 	CALL countList
 
 
@@ -187,8 +188,8 @@ main PROC
 	PUSH OFFSET one_space		; push the space string
 	PUSH OFFSET list_message     ; offset +4
 	PUSH OFFSET	countsArray			; ****** THIS WILL NEED TO BE CHANGED TO THE NUMS LIST EVENTUALLY *****
-	PUSH arrayLength
-	PUSH arrayType
+	PUSH countsArrLen
+	;PUSH arrayType
 	CALL displayList		     ; displayList 3rd call for list_message
 
 	; ---
@@ -265,9 +266,8 @@ fillArray PROC
 	PUSH EBP		; +4
 	MOV  EBP, ESP	; Base Pointer
 
-	PUSH EAX        ; Preserve used registers
-	PUSH ECX
-	PUSH EDI
+	PUSHAD        ; Preserve used registers
+	
 	; ...
 	MOV  ECX, [EBP+16] ; List length into ECX
 	MOV  EDI, [EBP+20] ; Address of list into EDI
@@ -287,9 +287,7 @@ fillArray PROC
 		LOOP _fillLoop
 
 	;...
-	POP EDI
-	POP ECX
-	POP EAX
+	POPAD
 	POP EBP
 	RET 16
 fillArray ENDP
@@ -316,24 +314,22 @@ displayList PROC
 	PUSHAD			; preserve all gp registers
 	; ...
 
-	MOV  EDX, [EBP+20] ; Write the message string
+	MOV  EDX, [EBP+16] ; Write the message string
 	CALL WriteString
 	CALL CrLf
 
 	; ...
 	; Display the list of ints here
-
-	; TEST DISPLAY IN MAIN---DELETE THIS---THIS bWorks!!!
-	MOV  ESI, [EBP+16]	; move randArray start ref to ESI
-	MOV  ECX, ARRAYSIZE	; move ARRAYSIZE to ECX counter
+	MOV  EDI, [EBP+12]	; move randArray start ref to EDI
+	MOV  ECX, [EBP+8]	; move ARRAYSIZE or countsArrLen to ECX counter
 	_PrintArr:
-		MOV EAX, [ESI]
+		MOV EAX, [EDI]
 		CALL WriteDec
 
-		MOV EDX, [EBP+24]	; wrtie the one_space string
+		MOV EDX, [EBP+20]	; wrtie the one_space string
 		CALL WriteString
 
-		ADD ESI, [EBP+8]
+		ADD EDI, 4
 		
 		LOOP _PrintArr
 	
@@ -342,7 +338,7 @@ displayList PROC
 
 	POPAD		; restore all gp registers
 	POP EBP
-	RET 20
+	RET 16
 displayList ENDP
 
 
@@ -533,48 +529,33 @@ countList PROC
 
 
 
-	MOV ECX, ARRAYSIZE	; loop counter to arraysize
-	MOV ESI, [EBP+8]	; pointer to start of countsArray index0
-	MOV EDI, [EBP+12]   ; pointer to start of randArray index0
-	MOV EAX, [EDI]		; copy first array value at EDI pointer to EAX
-	MOV EBX, 0 ; count for index of randArray
-	MOV EDX, LO ; register
+	MOV ECX, [EBP+8]	; loop counter to countsArrLen
+	MOV EDI, [EBP+16]   ; pointer to start of randArray index0
+	MOV ESI, [EBP+12]	; pointer to start of countsArray index0
+	MOV EDX, LO			; holds Lo and increments up 
 
-	; not handling if a value at lo (or later on)... need to account for if values have zero instances
-	_checkZeros:
-		CMP [EDI], EDX
-		JNE _isZero
-
-	_isZero:
-		MOV [ESI], EBX	
-		ADD ESI, 4
-		ADD EDX, 1
-
-
-
-
- ; not incorporated into above yet... fix this
-
-	_countsLoop:
-		CMP [EDI], EAX
-		JE	 _sameVal
-		JNE  _diffVal
+	_countsArrLoop:
+		MOV EBX, 0      ; value amount counter reset to 0
 		
+		_skipValReset:
+			CMP [EDI], EDX
+			JNE _inputValue
+			JE  _sameValueHappened
 
-		_sameVal:
-			ADD EBX, 1
-			JMP _countsEnd
+		_sameValueHappened:
+			ADD	EBX, 1	   ; add 1 to value counter
+			ADD EDI, 4     ; inc edi pointer
+			JMP _skipValReset
 
-		_diffVal:
-			MOV 
-
-		_countsEnd:
-			ADD EDI, 4
-			LOOP _countsLoop
+		_inputValue:
+			MOV [ESI], EBX	
+			ADD ESI, 4
+			ADD EDX, 1
+			LOOP _countsArrLoop   ; dec ecx
 
 	POPAD
 	POP	EBP
-	RET 8
+	RET 12
 countList ENDP
 
 
@@ -614,3 +595,77 @@ farewell ENDP
 
 END main
 
+
+; OLDE counList
+
+; countList PROC
+	; Set up Base pointer
+;	PUSH EBP		; +4
+;	MOV  EBP, ESP	; Base Pointer
+;	PUSHAD        ; preserve registers
+;	; ...
+;
+;
+;
+;	MOV ECX, ARRAYSIZE	; loop counter to arraysize
+;	MOV ESI, [EBP+8]	; pointer to start of countsArray index0
+;	MOV EDI, [EBP+12]   ; pointer to start of randArray index0
+;	
+;	;MOV EAX, [EDI]		; copy first array value at EDI pointer to EAX
+;	MOV EBX, 0			; count for index of randArray
+;	MOV EDX, LO			; holds Lo and increments up 
+;
+;	; not handling if a value at lo (or later on)... need to account for if values have zero instances
+;	_checkVals:
+;		; dont forget to stop the loop with HI when EDX reaches it...
+;		CMP EDX, HI
+;		JG  _endCountItter...
+;
+;		CMP [EDI], EDX		; compare randArray item to LO (+)
+;		JNE _countZero
+;		JE  _sameValueHappened
+;
+;	_countZero:
+;		MOV [ESI], 0	
+;		ADD ESI, 4
+;		ADD EDX, 1
+;		JMP _checkVals
+;
+;	_sameValueHappened:
+;		ADD	EBX, 1	   ; add 1 to value counter
+;		MOV EAX, [EDI] ; eax now holds the current (soon to be old) value for comparison
+;		ADD EDI, 4     ; inc EDI pointer
+;		CMP [EDI], EAX ; compare next to prev
+;		JG  _endCountItter
+;		JE  _checkVals
+;
+;	_endCountItter:
+;		MOV [ESI], EBX  ; move ebx count into current esi array position
+;
+;
+;
+;
+
+ ; not incorporated into above yet... fix this
+
+;	_countsLoop:
+;		CMP [EDI], EAX
+;		JE	 _sameVal
+;		JNE  _diffVal
+;		
+;
+;		_sameVal:
+;			ADD EBX, 1
+;			JMP _countsEnd
+;
+;		_diffVal:
+;			MOV 
+;
+;		_countsEnd:
+;			ADD EDI, 4
+;			LOOP _countsLoop
+;
+;	POPAD
+;	POP	EBP
+;	RET 8
+;countList ENDP
