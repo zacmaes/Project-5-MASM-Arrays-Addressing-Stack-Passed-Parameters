@@ -7,90 +7,13 @@ TITLE Project Five: Arrays, Addressing, Stack Passed Params     (Proj5_maesz.asm
 ; Project Number: 5               Due Date: August 7th, 2022
 ; Description: 
 
-
-
-; DELETE THIS!!!
-; EXAMPLE PYTHON BUBBLE SORT
-;def bubble_sort(a_list):
-    ;"""
-    ;Bubble sort algorithm that sorts a_list in ascending order.
-    ;"""
-    ;for pass_num in range(len(a_list) - 1):
-    ;    for index in range(len(a_list) - 1 - pass_num):
-       ;     if a_list[index] > a_list[index + 1]:
-     ;           temp = a_list[index]
-     ;           a_list[index] = a_list[index + 1]
-     ;           a_list[index + 1] = temp
-
-
-; PROGRAM DESCRIPTION FROM CANVAS
-
-; 1. Introduce the program
-
-; 2. Declare global constants with initial sizes ( ARRAYSIZE=200, LO=15, and HI=50.)
-;		-Generate ARRAYSIZE random integers in the range from LO to HI (Inclusive)
-;		-Store these random integers in consecutive elements of array randArray.
-;		-Hint: Call Randomize once in main to generate a random seed. Later, use RandomRange to generate each random number.
-;					HI - (LO - 1) into EAX to get EAX, 36... returned random in range [0 - 35 inc.]...add LO [15] to the random val in EAX when done.
-
-; 3. Display the list of integers before sorting, 20 numbers per line with one space between eah value.
-
-; 4. Sort the list in ascending order (smallest first)
-
-; 5. Calculate and display the median value of the sorted randArray, rounded to the nearest integer. (USING Round half up rounding described in Canvas) 
-
-; 6. Display the sorted randArray, 20 numbers per line with one space between each value. Use (not a complete sentance in canvas...)
-
-; 7. generate an array counts which holds the number of times each value in the range [LO, HI] is ssen in randArray, 
-;		even if the number of times a value is seen is zero.
-;	    For example check canvas...also report 0 count as a 0 in the array
-
-; 8. Display the array counts, 20 numbers per line with one space between each value.
-
-
-
-; PROGRAM REQUIREMENTS FROM CANVAS
-
-; 1. The program must be constructed using procedures. Required procedures listed below:
-;		a. main
-;			input parameters: N/A
-;		   output parameters: N/A
-
-;		b. introduction
-;			input parameters: intro1 (reference), intro2 (reference), ...etc if needed
-;		   output parameters: N/A
-
-;       c. fillArray
-;			input parameters: N/A
-;		   output parameters: someArray (reference)
-;						Note: LO, HI, ARRAYSIZE will be used as globals within this procedure
-
-;		d. sortList
-;			input parameters: 
-;		   output parameters:
-
-;		e. exchangeElements
-;			input parameters:
-;		   output parameters:
-
-;		f. displayMedian
-;			input parameters:
-;		   output parameters:
-
-;		g. displayList
-;			input parameters:
-;		   output parameters:
-
-;		h. countList
-;			input parameters:
-;		   output parameters:
-;
-;
-;
-;
-;
-;
-;
+; 200 random decimals are generated and filled into a list called randArray. The length is defined by the constant ARRAYSIZE.
+; The random decimals are within the range of 15 and 50 incluseive. These ranges are defined by the constants LO and HI.
+; The original random randArray list is displayed first, and then sorted in place in ascending order with a bubble sort algorithm.
+; After sorting, the newly sorted randArray list passed to another procedure that finds the median value of the sorted list.
+; The found median value is displayed, and then the sorted list is displayed. Next the sorted list and an empty countsList are passed to a new procedure.
+; This new procedure fills countsList with the count of each value from randArray in the range of [15-50] or [LO - HI] and displays the list of instances.
+; Finally the program is completed with a farewell message.
 
 INCLUDE Irvine32.inc
 ; (insert macro definitions here)
@@ -104,8 +27,15 @@ HI        = 50
 ; (insert variable definitions here)
 
 ;INTRODUCTION DATA
-greeting		    BYTE	"Welcome to Project Five: Arrays, Addressing, Stack Passed Params by Zachary Maes!",0
-description_1       BYTE	"This program will do something akin to magic... The programmer WILL CHANGE THIS DESCRIPTION LATER ON!!!",0
+greeting		    BYTE	"Project Five: Arrays, Addressing, Stack Passed Parameters by Zachary Maes!",0
+description_1       BYTE	"This program will do something akin to magic...",0
+description_2       BYTE	"200 random decimals are generated and filled into a list called randArray. The length is defined by the constant ARRAYSIZE.",0
+description_3       BYTE	"The random decimals are within the range of 15 and 50 incluseive. These ranges are defined by the constants LO and HI.",0
+description_4       BYTE	"The original random randArray list is displayed first, and then sorted in place in ascending order with a bubble sort algorithm.",0
+description_5       BYTE	"After sorting, the newly sorted randArray list passed to another procedure that finds the median value of the sorted list.",0
+description_6       BYTE	"The found median value is displayed, and then the sorted list is displayed. Next the sorted list and an empty countsList are passed to a new procedure.",0
+description_7       BYTE	"This new procedure fills countsList with the count of each value from randArray in the range of [15-50] or [LO - HI] and displays the list of instances.",0
+description_8       BYTE	"Finally the program is completed with a farewell message.",0
 
 ; DISPLAY DATA
 unsorted_message    BYTE    "Your unsorted random numbers:",0
@@ -129,8 +59,16 @@ main PROC
 ; (insert executable instructions here)
 	CALL Randomize				   ; Initialize starting seed vaue of RandomRange procedure
 
-	PUSH OFFSET greeting		   ; push strings to stack
+			   
+	PUSH OFFSET description_8      ; push strings to stack
+	PUSH OFFSET description_7    
+	PUSH OFFSET description_6    
+	PUSH OFFSET description_5    
+	PUSH OFFSET description_4    
+	PUSH OFFSET description_3    
+	PUSH OFFSET description_2    
 	PUSH OFFSET description_1    
+	PUSH OFFSET greeting
 	CALL introduction			
 
 	PUSH OFFSET randArray          ; push address of randArray to stack
@@ -180,7 +118,8 @@ main ENDP
 ; Name: introduction
 ;
 ; Description: 
-; Introduces the Program and Author at the start of the program.
+; Introduces the Program and Author at the start of the program. It then uses a loop to print
+;	all passed parameter strings for the program introduction.
 ;
 ; Preconditions: The required strings must be declared in the .data section,
 ;	and also pushed to the stack prior to the procedure call.
@@ -188,28 +127,41 @@ main ENDP
 ; Postconditions: None
 ;
 ; Receives:
-;	[EBP+12] = offset of greeting string
-;	[EBP+8]  = offset of description_1 string 
+;	[EBP+40] = offset description_8      
+;	[EBP+36] = offset description_7    
+;	[EBP+32] = offset description_6    
+;	[EBP+28] = offset description_5    
+;	[EBP+24] = offset description_4    
+;	[EBP+20] = offset description_3    
+;	[EBP+16] = offset description_2    
+;	[EBP+12] = offset of description_1 string
+;	[EBP+8]  = offset of greeting string
 ;
 ; Returns: N/A
 ; ---------------------------------------------------------------------------------
 
 introduction PROC
-	PUSH EBP	        ; Base Pointer	
+	PUSH EBP					; Base Pointer	
 	MOV  EBP, ESP	
-	PUSH EDX			; Preserve EDX
+	PUSHAD						; Preserve all registers
 
-	MOV  EDX, [EBP+12] 
+	MOV  EAX, 8					; 8 for base+offset addressing of first string
+	MOV  EDX, [EBP+EAX]			; set up first string in edx for printing
 	CALL WriteString
 	CALL CrLf
 	CALL CrLf
 
-	MOV  EDX, [EBP+8]
-	CALL WriteString
+	ADD  EAX, 4					; increment eax for first string in loop to follow
+	MOV  ECX, 8					; loop counter
+	_introLoop:					; loops 8x through all passed intro strings and prints them.
+		MOV  EDX, [EBP+EAX]
+		CALL WriteString
+		CALL CrLf
+		ADD  EAX, 4
+		LOOP _introLoop
+	
 	CALL CrLf
-	CALL CrLf
-
-	POP EDX   
+	POPAD   
 	POP EBP
 	RET 8
 introduction ENDP
@@ -576,16 +528,16 @@ countList ENDP
 ; ---------------------------------------------------------------------------------
 
 farewell PROC
-	PUSH EBP		; Base Pointer
+	PUSH EBP			; Base Pointer
 	MOV  EBP, ESP	
-	PUSH EDX        ; preserve edx
+	PUSH EDX			; preserve edx
 
-	MOV  EDX, [EBP+8] 
-	CALL WriteString
+	MOV  EDX, [EBP+8]	; access farewell_1 string reference from stack
+	CALL WriteString	; write the string to the terminal
 	CALL CrLf
 	CALL CrLf
 
-	POP	EDX
+	POP	EDX		
 	POP	EBP
 	RET 4
 farewell ENDP
