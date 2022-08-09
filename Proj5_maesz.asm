@@ -136,14 +136,14 @@ main PROC
 
 	; ---
 	
-	PUSH OFFSET greeting		 ; offset +4
-	PUSH OFFSET description_1    ; offset +4
-	CALL introduction			 ; return address +4
+	PUSH OFFSET greeting		; push strings to stack
+	PUSH OFFSET description_1    
+	CALL introduction			
 
 	; ---
 
-	PUSH OFFSET randArray        ; pass address of element 1 in randArray
-	PUSH ARRAYSIZE
+	PUSH OFFSET randArray        ; push address of randArray to stack
+	PUSH ARRAYSIZE				 ; push Constants to stack (REFACTOR THIS EVENTUALLY)
 	PUSH LO
 	PUSH HI
 	CALL fillArray
@@ -214,15 +214,18 @@ main ENDP
 ; Name: introduction
 ;
 ; Description: 
-; Introduces the 
+; Introduces the Program and Author at the start of the program.
 ;
-; Preconditions: 
+; Preconditions: The required strings must be declared in the .data section,
+;	and also pushed to the stack prior to the procedure call.
 ;
-; Postconditions:
+; Postconditions: None
 ;
 ; Receives:
+;	[EBP+12] = offset of greeting string
+;	[EBP+8]  = offset of description_1 string 
 ;
-; Returns:
+; Returns: N/A
 ; ---------------------------------------------------------------------------------
 
 introduction PROC
@@ -251,7 +254,8 @@ introduction ENDP
 ; ---------------------------------------------------------------------------------
 ; Name: fillArray
 ;
-; Description: 
+; This procedure uses a loop to generate random decimals and insert them into 
+;     an empty array.
 ;
 ; Preconditions: 
 ;
