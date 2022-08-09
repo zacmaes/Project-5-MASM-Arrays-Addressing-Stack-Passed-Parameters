@@ -1,100 +1,24 @@
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/09/22 12:52:49
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/09/22 13:08:21
 <Project Five: Arrays, Addressing, Stack Passed Params     (  Page 1 - 1
 
 
 				TITLE Project Five: Arrays, Addressing, Stack Passed Params     (Proj5_maesz.asm)
 
 				; Author: Zachary Maes
-				; Last Modified: August 4th, 2022
+				; Last Modified: August 9th, 2022
 				; OSU email address: maesz@oregonstate.edu
 				; Course number/section: CS271 Section 400
-				; Project Number: 5               Due Date: August 7th, 2022
+				; Project Number: 5    Due Date: August 7th, 2022 [2 Grace days in canvas]
 				; Description: 
 
-
-
-				; DELETE THIS!!!
-				; EXAMPLE PYTHON BUBBLE SORT
-				;def bubble_sort(a_list):
-				    ;"""
-				    ;Bubble sort algorithm that sorts a_list in ascending order.
-				    ;"""
-				    ;for pass_num in range(len(a_list) - 1):
-				    ;    for index in range(len(a_list) - 1 - pass_num):
-				       ;     if a_list[index] > a_list[index + 1]:
-				     ;           temp = a_list[index]
-				     ;           a_list[index] = a_list[index + 1]
-				     ;           a_list[index + 1] = temp
-
-
-				; PROGRAM DESCRIPTION FROM CANVAS
-
-				; 1. Introduce the program
-
-				; 2. Declare global constants with initial sizes ( ARRAYSIZE=200, LO=15, and HI=50.)
-				;		-Generate ARRAYSIZE random integers in the range from LO to HI (Inclusive)
-				;		-Store these random integers in consecutive elements of array randArray.
-				;		-Hint: Call Randomize once in main to generate a random seed. Later, use RandomRange to generate each random number.
-				;					HI - (LO - 1) into EAX to get EAX, 36... returned random in range [0 - 35 inc.]...add LO [15] to the random val in EAX when done.
-
-				; 3. Display the list of integers before sorting, 20 numbers per line with one space between eah value.
-
-				; 4. Sort the list in ascending order (smallest first)
-
-				; 5. Calculate and display the median value of the sorted randArray, rounded to the nearest integer. (USING Round half up rounding described in Canvas) 
-
-				; 6. Display the sorted randArray, 20 numbers per line with one space between each value. Use (not a complete sentance in canvas...)
-
-				; 7. generate an array counts which holds the number of times each value in the range [LO, HI] is ssen in randArray, 
-				;		even if the number of times a value is seen is zero.
-				;	    For example check canvas...also report 0 count as a 0 in the array
-
-				; 8. Display the array counts, 20 numbers per line with one space between each value.
-
-
-
-				; PROGRAM REQUIREMENTS FROM CANVAS
-
-				; 1. The program must be constructed using procedures. Required procedures listed below:
-				;		a. main
-				;			input parameters: N/A
-				;		   output parameters: N/A
-
-				;		b. introduction
-				;			input parameters: intro1 (reference), intro2 (reference), ...etc if needed
-				;		   output parameters: N/A
-
-				;       c. fillArray
-				;			input parameters: N/A
-				;		   output parameters: someArray (reference)
-				;						Note: LO, HI, ARRAYSIZE will be used as globals within this procedure
-
-				;		d. sortList
-				;			input parameters: 
-				;		   output parameters:
-
-				;		e. exchangeElements
-				;			input parameters:
-				;		   output parameters:
-
-				;		f. displayMedian
-				;			input parameters:
-				;		   output parameters:
-
-				;		g. displayList
-				;			input parameters:
-				;		   output parameters:
-
-				;		h. countList
-				;			input parameters:
-				;		   output parameters:
-				;
-				;
-				;
-				;
-				;
-				;
-				;
+				; This program creates random decimal values based upon three defined constants, ARRAYSIZE=200, LO=15, and HI-50. These constants should be able to be 
+				; modified by future programmers to change the ranges and list lenghts. For now, 200 random decimals are generated and filled into a list called randArray. 
+				; The length is defined by the constant ARRAYSIZE. The random decimals are within the range of 15 and 50 inclusive. These ranges are defined by the constants LO and HI.
+				; The original random randArray list is displayed first, and then sorted in place in ascending order with a bubble sort algorithm.
+				; After sorting, the newly sorted randArray list is passed to another procedure that finds the median value of the sorted list.
+				; The found median value is displayed, and then the sorted list is displayed. Next the sorted list and an empty countsList are passed to a new procedure.
+				; This new procedure fills countsList with the count of each value from randArray in the range of [15-50] or [LO - HI] and displays the list of instances.
+				; Finally the program is completed with a farewell message.
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -326,57 +250,66 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/09/22 12:52:49
 	   65 2E 00
 
 				; DISPLAY DATA
- 000003D5 59 6F 75 72 20	unsorted_message    BYTE    "Your unsorted random numbers:",0
-	   75 6E 73 6F 72
-	   74 65 64 20 72
-	   61 6E 64 6F 6D
-	   20 6E 75 6D 62
-	   65 72 73 3A 00
- 000003F3 54 68 65 20 6D	median_message      BYTE    "The median value of the array: ",0
-	   65 64 69 61 6E
-	   20 76 61 6C 75
-	   65 20 6F 66 20
-	   74 68 65 20 61
-	   72 72 61 79 3A
+ 000003D5 55 4E 53 4F 52	unsorted_message    BYTE    "UNSORTED RANDOM DECIMAL LIST:",0
+	   54 45 44 20 52
+	   41 4E 44 4F 4D
+	   20 44 45 43 49
+	   4D 41 4C 20 4C
+	   49 53 54 3A 00
+ 000003F3 4D 45 44 49 41	median_message      BYTE    "MEDIAN VALUE OF THE SORTED DECIMAL LIST: ",0
+	   4E 20 56 41 4C
+	   55 45 20 4F 46
+	   20 54 48 45 20
+	   53 4F 52 54 45
+	   44 20 44 45 43
+	   49 4D 41 4C 20
+	   4C 49 53 54 3A
 	   20 00
- 00000413 59 6F 75 72 20	sorted_message      BYTE    "Your sorted random numbers:",0
-	   73 6F 72 74 65
-	   64 20 72 61 6E
-	   64 6F 6D 20 6E
-	   75 6D 62 65 72
-	   73 3A 00
- 0000042F 59 6F 75 72 20	list_message        BYTE    "Your list of instances of each generated number, starting with the smallest value:",0
-	   6C 69 73 74 20
-	   6F 66 20 69 6E
-	   73 74 61 6E 63
-	   65 73 20 6F 66
-	   20 65 61 63 68
-	   20 67 65 6E 65
-	   72 61 74 65 64
-	   20 6E 75 6D 62
-	   65 72 2C 20 73
-	   74 61 72 74 69
-	   6E 67 20 77 69
-	   74 68 20 74 68
-	   65 20 73 6D 61
-	   6C 6C 65 73 74
-	   20 76 61 6C 75
-	   65 3A 00
- 00000482 20 00			one_space           BYTE    " ",0
+ 0000041D 53 4F 52 54 45	sorted_message      BYTE    "SORTED RANDOM DECIMAL LIST (ASCENDING):",0
+	   44 20 52 41 4E
+	   44 4F 4D 20 44
+	   45 43 49 4D 41
+	   4C 20 4C 49 53
+	   54 20 28 41 53
+	   43 45 4E 44 49
+	   4E 47 29 3A 00
+ 00000445 4C 49 53 54 20	list_message        BYTE    "LIST OF INSTANCES OF EACH GENERATED DECIMAL STARTING AT THE VALUE OF LO AND ASCENDING TO THE VALUE OF HI:",0
+	   4F 46 20 49 4E
+	   53 54 41 4E 43
+	   45 53 20 4F 46
+	   20 45 41 43 48
+	   20 47 45 4E 45
+	   52 41 54 45 44
+	   20 44 45 43 49
+	   4D 41 4C 20 53
+	   54 41 52 54 49
+	   4E 47 20 41 54
+	   20 54 48 45 20
+	   56 41 4C 55 45
+	   20 4F 46 20 4C
+	   4F 20 41 4E 44
+	   20 41 53 43 45
+	   4E 44 49 4E 47
+	   20 54 4F 20 54
+	   48 45 20 56 41
+	   4C 55 45 20 4F
+	   46 20 48 49 3A
+	   00
+ 000004AF 20 00			one_space           BYTE    " ",0					; used to print a space inbetween the decimals when displayed
 
 				; ARRAYS
- 00000484  0000001E [		randArray			DWORD   ARRAYSIZE DUP(?)	    ; DUP declaration, empty Array of ARRAYSIZE
+ 000004B1  0000001E [		randArray			DWORD   ARRAYSIZE DUP(?)	    ; DUP declaration, empty Array of ARRAYSIZE
 	    00000000
 	   ]
- 000004FC 0000001E		arrayLength			DWORD	LENGTHOF randArray      ; save length of randArray
+ 00000529 0000001E		arrayLength			DWORD	LENGTHOF randArray      ; save length of randArray
 
- 00000500  00000024 [		countsArray         DWORD   (HI - LO + 1) DUP(?)    ; set up counts array to store the final counted elements
+ 0000052D  00000024 [		countsArray         DWORD   (HI - LO + 1) DUP(?)    ; set up counts array to store the final counted elements
 	    00000000
 	   ]
- 00000590 00000024		countsArrLen		DWORD	LENGTHOF countsArray    ; length of the the counts array for use in loop.
+ 000005BD 00000024		countsArrLen		DWORD	LENGTHOF countsArray    ; length of the the counts array for use in loop.
 
 				; FAREWELL DATA
- 00000594 49 66 20 79 6F	farewell_1          BYTE    "If you have made it this far, congratulations! Thanks for reading my program, goodbye!",0
+ 000005C1 49 66 20 79 6F	farewell_1          BYTE    "If you have made it this far, congratulations! Thanks for reading my program, goodbye!",0
 	   75 20 68 61 76
 	   65 20 6D 61 64
 	   65 20 69 74 20
@@ -399,7 +332,6 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/09/22 12:52:49
  00000000			main PROC
 				; (insert executable instructions here)
  00000000  E8 00000000 E		CALL Randomize				   ; Initialize starting seed vaue of RandomRange procedure
-
 							   
  00000005  68 0000039B R		PUSH OFFSET description_8      ; push strings to stack
  0000000A  68 00000302 R		PUSH OFFSET description_7    
@@ -412,44 +344,41 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/09/22 12:52:49
  0000002D  68 00000000 R		PUSH OFFSET greeting
  00000032  E8 0000008F			CALL introduction			
 
- 00000037  68 00000484 R		PUSH OFFSET randArray          ; push address of randArray to stack
+ 00000037  68 000004B1 R		PUSH OFFSET randArray          ; push address of randArray to stack
  0000003C  E8 000000C6			CALL fillArray
 
- 00000041  68 00000482 R		PUSH OFFSET one_space		   ; push the space string
- 00000046  68 000003D5 R		PUSH OFFSET unsorted_message   ; offset +4
- 0000004B  68 00000484 R		PUSH OFFSET randArray
+ 00000041  68 000004AF R		PUSH OFFSET one_space		   ; push string offsets
+ 00000046  68 000003D5 R		PUSH OFFSET unsorted_message   
+ 0000004B  68 000004B1 R		PUSH OFFSET randArray
  00000050  6A 1E			PUSH ARRAYSIZE
  00000052  E8 000000DB			CALL displayList			   ; displayList 1st call for unsorted
 
- 00000057  68 00000484 R		PUSH OFFSET randArray		   ; push address of randArray to stack
- 0000005C  E8 0000010B			CALL sortList
+ 00000057  68 000004B1 R		PUSH OFFSET randArray		   ; push address of randArray to stack
+ 0000005C  E8 0000010B			CALL sortList				   ; Calls exchangeElements within the sortList proc
 
- 00000061  68 00000482 R		PUSH OFFSET one_space		   ; push the space string
- 00000066  68 00000413 R		PUSH OFFSET sorted_message     ; offset +4
- 0000006B  68 00000484 R		PUSH OFFSET randArray
+ 00000061  68 000004AF R		PUSH OFFSET one_space		   ; push the space string
+ 00000066  68 0000041D R		PUSH OFFSET sorted_message     
+ 0000006B  68 000004B1 R		PUSH OFFSET randArray
  00000070  6A 1E			PUSH ARRAYSIZE
  00000072  E8 000000BB			CALL displayList			   ; displayList 2nd call for sorted
 					
- 00000077  68 000003F3 R		PUSH OFFSET median_message
- 0000007C  68 00000484 R		PUSH OFFSET randArray
+ 00000077  68 000003F3 R		PUSH OFFSET median_message	   ; push string and array offsets	
+ 0000007C  68 000004B1 R		PUSH OFFSET randArray
  00000081  E8 0000010C			CALL displayMedian
 
- 00000086  68 00000484 R		PUSH OFFSET randArray
- 0000008B  68 00000500 R		PUSH OFFSET countsArray
- 00000090  FF 35 00000590 R		PUSH countsArrLen
+ 00000086  68 000004B1 R		PUSH OFFSET randArray		   ; push array offsets
+ 0000008B  68 0000052D R		PUSH OFFSET countsArray
+ 00000090  FF 35 000005BD R		PUSH countsArrLen
  00000096  E8 00000172			CALL countList
 
- 0000009B  68 00000482 R		PUSH OFFSET one_space		   ; push the space string
- 000000A0  68 0000042F R		PUSH OFFSET list_message       ; offset +4
- 000000A5  68 00000500 R		PUSH OFFSET	countsArray		   
- 000000AA  FF 35 00000590 R		PUSH countsArrLen
+ 0000009B  68 000004AF R		PUSH OFFSET one_space		   ; push string offsets
+ 000000A0  68 00000445 R		PUSH OFFSET list_message       
+ 000000A5  68 0000052D R		PUSH OFFSET	countsArray		   
+ 000000AA  FF 35 000005BD R		PUSH countsArrLen
  000000B0  E8 0000007D			CALL displayList		       ; displayList 3rd call for list_message
 
-				;  OTHER REQUIRED PROCS
-				;	CALL exchangeElements
-
- 000000B5  68 00000594 R	    PUSH OFFSET farewell_1	    
- 000000BA  E8 00000182			CALL farewell			       ; My additional procedure, stack return address +4
+ 000000B5  68 000005C1 R	    PUSH OFFSET farewell_1	    
+ 000000BA  E8 00000182			CALL farewell			       ; My additional farewell procedure
 
 					Invoke ExitProcess,0	       ; exit to operating system
  000000BF  6A 00	   *	    push   +000000000h
@@ -461,7 +390,8 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/09/22 12:52:49
 				; Name: introduction
 				;
 				; Description: 
-				; Introduces the Program and Author at the start of the program.
+				; Introduces the Program and Author at the start of the program. It then uses a loop to print
+				;	all passed parameter strings for the program introduction.
 				;
 				; Preconditions: The required strings must be declared in the .data section,
 				;	and also pushed to the stack prior to the procedure call.
@@ -885,7 +815,7 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/09/22 12:52:49
  0000025C			farewell ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/09/22 12:52:49
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    08/09/22 13:08:21
 <Project Five: Arrays, Addressing, Stack Passed Params     (  Symbols 2 - 1
 
 
@@ -979,7 +909,7 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000005EB Para	  Public  'DATA'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000618 Para	  Public  'DATA'	
 _TEXT  . . . . . . . . . . . . .	32 Bit	 0000025C Para	  Public  'CODE'	
 
 
@@ -1335,12 +1265,12 @@ VK_UP  . . . . . . . . . . . . .	Number	 00000026h
 WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h   
 WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
 WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
-arrayLength  . . . . . . . . . .	DWord	 000004FC _DATA	
+arrayLength  . . . . . . . . . .	DWord	 00000529 _DATA	
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-countsArrLen . . . . . . . . . .	DWord	 00000590 _DATA	
-countsArray  . . . . . . . . . .	DWord	 00000500 _DATA	
+countsArrLen . . . . . . . . . .	DWord	 000005BD _DATA	
+countsArray  . . . . . . . . . .	DWord	 0000052D _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 description_1  . . . . . . . . .	Byte	 0000004B _DATA	
 description_2  . . . . . . . . .	Byte	 0000007B _DATA	
@@ -1351,7 +1281,7 @@ description_6  . . . . . . . . .	Byte	 0000026A _DATA
 description_7  . . . . . . . . .	Byte	 00000302 _DATA	
 description_8  . . . . . . . . .	Byte	 0000039B _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-farewell_1 . . . . . . . . . . .	Byte	 00000594 _DATA	
+farewell_1 . . . . . . . . . . .	Byte	 000005C1 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
 greeting . . . . . . . . . . . .	Byte	 00000000 _DATA	
@@ -1361,13 +1291,13 @@ lightGray  . . . . . . . . . . .	Number	 00000007h
 lightGreen . . . . . . . . . . .	Number	 0000000Ah   
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
-list_message . . . . . . . . . .	Byte	 0000042F _DATA	
+list_message . . . . . . . . . .	Byte	 00000445 _DATA	
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 median_message . . . . . . . . .	Byte	 000003F3 _DATA	
-one_space  . . . . . . . . . . .	Byte	 00000482 _DATA	
-randArray  . . . . . . . . . . .	DWord	 00000484 _DATA	
+one_space  . . . . . . . . . . .	Byte	 000004AF _DATA	
+randArray  . . . . . . . . . . .	DWord	 000004B1 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-sorted_message . . . . . . . . .	Byte	 00000413 _DATA	
+sorted_message . . . . . . . . .	Byte	 0000041D _DATA	
 unsorted_message . . . . . . . .	Byte	 000003D5 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA

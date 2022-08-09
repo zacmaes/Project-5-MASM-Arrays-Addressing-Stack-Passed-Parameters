@@ -1,16 +1,17 @@
 TITLE Project Five: Arrays, Addressing, Stack Passed Params     (Proj5_maesz.asm)
 
 ; Author: Zachary Maes
-; Last Modified: August 4th, 2022
+; Last Modified: August 9th, 2022
 ; OSU email address: maesz@oregonstate.edu
 ; Course number/section: CS271 Section 400
-; Project Number: 5               Due Date: August 7th, 2022
+; Project Number: 5    Due Date: August 7th, 2022 [2 Grace days in canvas]
 ; Description: 
 
-; 200 random decimals are generated and filled into a list called randArray. The length is defined by the constant ARRAYSIZE.
-; The random decimals are within the range of 15 and 50 incluseive. These ranges are defined by the constants LO and HI.
+; This program creates random decimal values based upon three defined constants, ARRAYSIZE=200, LO=15, and HI-50. These constants should be able to be 
+; modified by future programmers to change the ranges and list lenghts. For now, 200 random decimals are generated and filled into a list called randArray. 
+; The length is defined by the constant ARRAYSIZE. The random decimals are within the range of 15 and 50 inclusive. These ranges are defined by the constants LO and HI.
 ; The original random randArray list is displayed first, and then sorted in place in ascending order with a bubble sort algorithm.
-; After sorting, the newly sorted randArray list passed to another procedure that finds the median value of the sorted list.
+; After sorting, the newly sorted randArray list is passed to another procedure that finds the median value of the sorted list.
 ; The found median value is displayed, and then the sorted list is displayed. Next the sorted list and an empty countsList are passed to a new procedure.
 ; This new procedure fills countsList with the count of each value from randArray in the range of [15-50] or [LO - HI] and displays the list of instances.
 ; Finally the program is completed with a farewell message.
@@ -38,11 +39,11 @@ description_7       BYTE	"This new procedure fills countsList with the count of 
 description_8       BYTE	"Finally the program is completed with a farewell message.",0
 
 ; DISPLAY DATA
-unsorted_message    BYTE    "Your unsorted random numbers:",0
-median_message      BYTE    "The median value of the array: ",0
-sorted_message      BYTE    "Your sorted random numbers:",0
-list_message        BYTE    "Your list of instances of each generated number, starting with the smallest value:",0
-one_space           BYTE    " ",0
+unsorted_message    BYTE    "UNSORTED RANDOM DECIMAL LIST:",0
+median_message      BYTE    "MEDIAN VALUE OF THE SORTED DECIMAL LIST: ",0
+sorted_message      BYTE    "SORTED RANDOM DECIMAL LIST (ASCENDING):",0
+list_message        BYTE    "LIST OF INSTANCES OF EACH GENERATED DECIMAL STARTING AT THE VALUE OF LO AND ASCENDING TO THE VALUE OF HI:",0
+one_space           BYTE    " ",0					; used to print a space inbetween the decimals when displayed
 
 ; ARRAYS
 randArray			DWORD   ARRAYSIZE DUP(?)	    ; DUP declaration, empty Array of ARRAYSIZE
@@ -58,7 +59,6 @@ farewell_1          BYTE    "If you have made it this far, congratulations! Than
 main PROC
 ; (insert executable instructions here)
 	CALL Randomize				   ; Initialize starting seed vaue of RandomRange procedure
-
 			   
 	PUSH OFFSET description_8      ; push strings to stack
 	PUSH OFFSET description_7    
@@ -74,41 +74,38 @@ main PROC
 	PUSH OFFSET randArray          ; push address of randArray to stack
 	CALL fillArray
 
-	PUSH OFFSET one_space		   ; push the space string
-	PUSH OFFSET unsorted_message   ; offset +4
+	PUSH OFFSET one_space		   ; push string offsets
+	PUSH OFFSET unsorted_message   
 	PUSH OFFSET randArray
 	PUSH ARRAYSIZE
 	CALL displayList			   ; displayList 1st call for unsorted
 
 	PUSH OFFSET randArray		   ; push address of randArray to stack
-	CALL sortList
+	CALL sortList				   ; Calls exchangeElements within the sortList proc
 
 	PUSH OFFSET one_space		   ; push the space string
-	PUSH OFFSET sorted_message     ; offset +4
+	PUSH OFFSET sorted_message     
 	PUSH OFFSET randArray
 	PUSH ARRAYSIZE
 	CALL displayList			   ; displayList 2nd call for sorted
 	
-	PUSH OFFSET median_message
+	PUSH OFFSET median_message	   ; push string and array offsets	
 	PUSH OFFSET randArray
 	CALL displayMedian
 
-	PUSH OFFSET randArray
+	PUSH OFFSET randArray		   ; push array offsets
 	PUSH OFFSET countsArray
 	PUSH countsArrLen
 	CALL countList
 
-	PUSH OFFSET one_space		   ; push the space string
-	PUSH OFFSET list_message       ; offset +4
+	PUSH OFFSET one_space		   ; push string offsets
+	PUSH OFFSET list_message       
 	PUSH OFFSET	countsArray		   
 	PUSH countsArrLen
 	CALL displayList		       ; displayList 3rd call for list_message
 
-;  OTHER REQUIRED PROCS
-;	CALL exchangeElements
-
     PUSH OFFSET farewell_1	    
-	CALL farewell			       ; My additional procedure, stack return address +4
+	CALL farewell			       ; My additional farewell procedure
 
 	Invoke ExitProcess,0	       ; exit to operating system
 main ENDP
