@@ -529,28 +529,28 @@ countList PROC
 	MOV  EBP, ESP				
 	PUSHAD							; preserve registers
 
-	MOV ECX, [EBP+8]				; loop counter to countsArrLen
-	MOV EDI, [EBP+16]				; pointer to start of randArray index0
-	MOV ESI, [EBP+12]				; pointer to start of countsArray index0
-	MOV EDX, LO						; holds Lo and increments up 
+	MOV  ECX, [EBP+8]				; loop counter to countsArrLen
+	MOV  EDI, [EBP+16]				; pointer to start of randArray index0
+	MOV  ESI, [EBP+12]				; pointer to start of countsArray index0
+	MOV  EDX, LO					; holds Lo and increments up 
 
 	_countsArrLoop:
 		MOV EBX, 0					; value amount counter reset to 0
 		
 		_skipValReset:
 			CMP [EDI], EDX
-			JNE _inputValue
-			JE  _sameValueHappened
+			JNE  _inputValue
+			JE   _sameValueHappened
 
 		_sameValueHappened:
-			ADD	EBX, 1				; add 1 to value counter
-			ADD EDI, 4				; inc edi pointer
-			JMP _skipValReset
+			ADD	 EBX, 1				; add 1 to value counter
+			ADD  EDI, 4				; inc edi pointer
+			JMP  _skipValReset
 
 		_inputValue:
 			MOV [ESI], EBX	
-			ADD ESI, 4
-			ADD EDX, 1
+			ADD  ESI, 4
+			ADD  EDX, 1
 			LOOP _countsArrLoop     ; dec ecx
 
 	POPAD
@@ -558,30 +558,27 @@ countList PROC
 	RET 12
 countList ENDP
 
-
-
-
-
 ; ---------------------------------------------------------------------------------
 ; Name: farewell
 ;
-; Description: 
+; Description: Extra procedure to print a farewell message. 
 ;
-; Preconditions: 
+; Preconditions:
+;	-farewell_1 data string must be declared and passed as a parmeter.
 ;
-; Postconditions:
+; Postconditions: N/A
 ;
 ; Receives:
+;	[EBP+8] = OFFSET reference to farewell_1 string
 ;
 ; Returns:
+;	-Uses WriteString instruction to print farewell_1 string
 ; ---------------------------------------------------------------------------------
 
 farewell PROC
-	; Set up Base pointer
-	PUSH EBP		; +4
-	MOV  EBP, ESP	; Base Pointer
+	PUSH EBP		; Base Pointer
+	MOV  EBP, ESP	
 	PUSH EDX        ; preserve edx
-	; ...
 
 	MOV  EDX, [EBP+8] 
 	CALL WriteString
@@ -594,78 +591,3 @@ farewell PROC
 farewell ENDP
 
 END main
-
-
-; OLDE counList
-
-; countList PROC
-	; Set up Base pointer
-;	PUSH EBP		; +4
-;	MOV  EBP, ESP	; Base Pointer
-;	PUSHAD        ; preserve registers
-;	; ...
-;
-;
-;
-;	MOV ECX, ARRAYSIZE	; loop counter to arraysize
-;	MOV ESI, [EBP+8]	; pointer to start of countsArray index0
-;	MOV EDI, [EBP+12]   ; pointer to start of randArray index0
-;	
-;	;MOV EAX, [EDI]		; copy first array value at EDI pointer to EAX
-;	MOV EBX, 0			; count for index of randArray
-;	MOV EDX, LO			; holds Lo and increments up 
-;
-;	; not handling if a value at lo (or later on)... need to account for if values have zero instances
-;	_checkVals:
-;		; dont forget to stop the loop with HI when EDX reaches it...
-;		CMP EDX, HI
-;		JG  _endCountItter...
-;
-;		CMP [EDI], EDX		; compare randArray item to LO (+)
-;		JNE _countZero
-;		JE  _sameValueHappened
-;
-;	_countZero:
-;		MOV [ESI], 0	
-;		ADD ESI, 4
-;		ADD EDX, 1
-;		JMP _checkVals
-;
-;	_sameValueHappened:
-;		ADD	EBX, 1	   ; add 1 to value counter
-;		MOV EAX, [EDI] ; eax now holds the current (soon to be old) value for comparison
-;		ADD EDI, 4     ; inc EDI pointer
-;		CMP [EDI], EAX ; compare next to prev
-;		JG  _endCountItter
-;		JE  _checkVals
-;
-;	_endCountItter:
-;		MOV [ESI], EBX  ; move ebx count into current esi array position
-;
-;
-;
-;
-
- ; not incorporated into above yet... fix this
-
-;	_countsLoop:
-;		CMP [EDI], EAX
-;		JE	 _sameVal
-;		JNE  _diffVal
-;		
-;
-;		_sameVal:
-;			ADD EBX, 1
-;			JMP _countsEnd
-;
-;		_diffVal:
-;			MOV 
-;
-;		_countsEnd:
-;			ADD EDI, 4
-;			LOOP _countsLoop
-;
-;	POPAD
-;	POP	EBP
-;	RET 8
-;countList ENDP
