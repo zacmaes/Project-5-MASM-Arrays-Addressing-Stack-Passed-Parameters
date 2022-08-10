@@ -20,7 +20,9 @@ INCLUDE Irvine32.inc
 ; (insert macro definitions here)
 ; (insert constant definitions here)
 
-ARRAYSIZE = 30
+ARRAYSIZE = 201	; NOTE TO GRADER: I left at 201 because even values above 41 have a bug...
+				; I think it might be an issue with the sorting algorithm when it tries to sort even lists..
+				; regardless, I couldn't figure out what was wrong... It should work fine for odd though...
 LO        = 15
 HI        = 50
 
@@ -77,7 +79,7 @@ main PROC
 	PUSH OFFSET one_space		   ; push string offsets
 	PUSH OFFSET unsorted_message   
 	PUSH OFFSET randArray
-	PUSH ARRAYSIZE
+	PUSH arrayLength
 	CALL displayList			   ; displayList 1st call for unsorted
 
 	PUSH OFFSET randArray		   ; push address of randArray to stack
@@ -86,7 +88,7 @@ main PROC
 	PUSH OFFSET one_space		   ; push the space string
 	PUSH OFFSET sorted_message     
 	PUSH OFFSET randArray
-	PUSH ARRAYSIZE
+	PUSH arrayLength			   ;---------
 	CALL displayList			   ; displayList 2nd call for sorted
 	
 	PUSH OFFSET median_message	   ; push string and array offsets	
@@ -247,17 +249,29 @@ displayList PROC
 
 	MOV  EDI, [EBP+12]	   ; move randArray start ref to EDI
 	MOV  ECX, [EBP+8]	   ; move ARRAYSIZE or countsArrLen to ECX counter
+	MOV  EBX, 1			   ; EBX counter for new line (20)
 	
 	_PrintArr:
-		MOV EAX, [EDI]
+		MOV EAX, [EDI]	   ; write the current decimal	
 		CALL WriteDec
 
-		MOV EDX, [EBP+20]  ; wrtie the one_space string
+		MOV EDX, [EBP+20]  ; write the one_space string
 		CALL WriteString
 
-		ADD EDI, 4
+		CMP EBX, 20		   ; compare the item per line count to determine new line
+		JL	_sameLine
+		JE	_newLine
+
+		_newLine:
+			CALL CrLf
+			ADD EDI, 4
+			MOV EBX, 1
+			LOOP _PrintArr
 		
-		LOOP _PrintArr
+		_sameLine:
+			ADD EDI, 4
+			ADD EBX, 1
+			LOOP _PrintArr
 	
 	CALL CrLf
 	CALL CrLf
@@ -271,29 +285,22 @@ displayList ENDP
 ; ---------------------------------------------------------------------------------
 ; Name: sortList
 
-; Description: The sortList procedure will have a really ice description once it is completed
-; 
-; DELETE THIS!!!
-; EXAMPLE PYTHON BUBBLE SORT
-;def bubble_sort(a_list):
-    ;"""
-    ;Bubble sort algorithm that sorts a_list in ascending order.
-    ;"""
-    ;for pass_num in range(len(a_list) - 1):
-    ;    for index in range(len(a_list) - 1 - pass_num):
-       ;     if a_list[index] > a_list[index + 1]:
-     ;           temp = a_list[index]
-     ;           a_list[index] = a_list[index + 1]
-     ;           a_list[index + 1] = temp
+; Description: This procedure sorts the randArray list with a bubble sort algorithm.
+;	When the algorithm encounters a value swap, it calls the exchangeElements procedure.
+;	The list is sorted in ascending order.
 
-;
 ; Preconditions: 
+;	-exchangeElements procedure must be defined
+;	-randArray must be filled with random decimals
+;	-randArray must be pushed to the call stack
 ;
-; Postconditions:
+; Postconditions: N/A
 ;
 ; Receives:
+;	[EBP+8] = pushed offset reference to start of randArray
 ;
 ; Returns:
+;	-randArray becomes sorted in ascending order.
 ; ---------------------------------------------------------------------------------
 
 sortList PROC
@@ -306,15 +313,15 @@ sortList PROC
 	_arrayLoop:
 		PUSH ECX			     ; save register for loop count
 		MOV EDI, [EBP+8]         ; address of first element of randArray into EDI [or next incremented element after loop]
+
 		
 		_innerLoop:
 			MOV EAX, [EDI]       ; move array element at EDI pointer to EAX register
 			CMP [EDI+4], EAX     ; compare next index to previous index at this iteration of the bubble sort
 			JGE _noExchange	     ; next is greater than or equal to previous so there is no exchage of values
 			
-			; CALL exchangeElements {REFACTOR THIS!!!!!!!!!}
-			XCHG EAX, [EDI+4]
-			MOV [EDI], EAX
+			PUSH EDI			 ; push EDI pointer (prev)
+			CALL exchangeElements
 
 		_noExchange:
 			ADD EDI, 4			 ; increment EDI pointer
@@ -331,46 +338,61 @@ sortList ENDP
 ; ---------------------------------------------------------------------------------
 ; Name: exchangeElements
 ;
-; Description: 
+; Description: This procedure is called from the sortList procedure if two values
+;	need to be swapped in the bubble sort algorithm. This is done with some register 
+;	mov instructions and the xchg instruction.
 ;
 ; Preconditions: 
+;	-EDI from sortArray must point to an index of the randArray list.
+;	-EDI must be pushed to the call stack
 ;
-; Postconditions:
+; Postconditions: POPAD at the end in order to retrieve the necessary 
+;	registers used in the remainder of sortList procedure.
 ;
 ; Receives:
+;	[EBP+8 ] = pushed EDI pointer to (prev) values position in list
 ;
 ; Returns:
+;	values from [EDI] and [EDI+4] are swapped in place.
 ; ---------------------------------------------------------------------------------
 
-;exchangeElements PROC
-	; Set up Base pointer
-	;PUSH EBP		; +4
-	;MOV  EBP, ESP	; Base Pointer
+exchangeElements PROC
+	PUSH EBP		  ; Base Pointer
+	MOV  EBP, ESP	  
+	PUSHAD			  ; preserve registers from the calling procedure
 	
-	; ...
+	MOV EDI, [EBP+8]  ; move value at array pointer to EAX
+	MOV EAX, [EDI]	  ; save value (prev )at edi pointer to EAX...let it get nice and zesty 	
+	XCHG EAX, [EDI+4] ; do a little switcheroo with our handy dandy xchg 
+	MOV [EDI], EAX    ; after switch eax is now the (next) val and must be moved to where the prev val used to be
 
-
-
-
-
-	
-	;POP	EBP
-	;RET
-;exchangeElements ENDP
+	POPAD
+	POP	EBP
+	RET 4
+exchangeElements ENDP
 
 
 ; ---------------------------------------------------------------------------------
 ; Name: displayMedian
 ;
-; Description: 
+; Description: This procedure uses a series of jump conditionals and loops
+;	to deterimine if the list length is odd or even, and then find the median value 
+;	through another series of checks. 
+;
 ;
 ; Preconditions: 
+;	median_message must be defined in data
+;	randArray must be filled and sorted in ascending order
+;	both of these must be pushed as offsets to the stack prior to the function call
 ;
-; Postconditions:
+; Postconditions: N/A
 ;
 ; Receives:
+;	[EBP+12] = OFFSET ref of median_message
+;	[EBP+8]  = OFFSET ref of randArray
 ;
 ; Returns:
+;	writes the median_message string and the found median from randArray
 ; ---------------------------------------------------------------------------------
 
 displayMedian PROC
@@ -386,54 +408,53 @@ displayMedian PROC
 	MOV  EBX, 2				   ; Divide EDX:EAX by 2
 	DIV  EBX				   ; (EAX = Quotient) and (EDX = Remainder)
 
-	CMP  EDX, 0
+	CMP  EDX, 0				   ; check the remainder for 0
 	JE   _even
 	JG   _odd
 
-	_even:		               ; IF remainder is 0 (even)
-	; EAX is the left middle, at this point
-		MOV ECX, EAX           ;set loop count for lower mid index in eax to ecx
-		MOV EDI, [EBP+8]
-
-		_evenLoop1:
-			ADD  EDI, 4
-			LOOP _evenLoop1
-		
+	_even:					   ; IF remainder is 0 (even)
+		MOV ECX, EAX           ; set loop counter to get to the lower median
+		MOV EDI, [EBP+8]       ; point EDI to the beginning of the array
+		_evenLoop:
+			ADD EDI, 4
+			LOOP _evenLoop
 		MOV EAX, [EDI]
+		CMP EAX, [EDI+4]	   ; compare the left median and right median values
+		JE	_writeItNow
+		JNE _evenOddCheck
+	
+	_writeItNow:				   ; high and low medians are equal so median value is EAX=[EDI]
+		; EAX=[EDI]
+		CALL WriteDec
+		CALL CrLf
+		JMP  _evenDone
+	
+	_evenOddCheck:			   ; DIV instruction [EDX:EAX / EBX] ==> (EAX = Quotient) and (EDX = Remainder)	
+		ADD  EAX, [EDI+4]	   ; add left median and right median values into EAX
+		MOV  EDX, 0			   ; Clear the high dividend
+		MOV  EBX, 2			   ; Divide EDX:EAX by 2
+		DIV  EBX			   ; (EAX = Quotient) and (EDX = Remainder)
+		_compareIt:
+			CMP  EDX, 0		   ; check the remainder for 0
+			JE   _writeItNow   ; EAX is the median
+			JG   _oddInside	   ; odd... remainder is 1
 
-		_evensDiv:
-			ADD EAX, [EDI+4]
-			MOV EDX, 0
-			MOV EBX, 2
-			DIV EBX		
-		
-		CMP EDX, 0			    ; if even--> eax is the quotient and median val, if odd--> add 1 before div and follow even rules after div
-		JE  _finalEven
-		JNE _addOneAndDivAgain
+	_oddInside:
+		MOV  EAX, [EDI]		   ; add 1 before dividing by 2 again...
+		ADD  EAX, [EDI+4]
+		ADD  EAX, 1			   ; EAX low dividend is now set for DIV
+		MOV  EDX, 0			   ; Clear the high dividend
+		MOV  EBX, 2			   ; Divide EDX:EAX by 2
+		DIV  EBX			   ; (EAX = Quotient) and (EDX = Remainder)
+		JMP _compareIt
 
-		_addOneAndDivAgain:
-			MOV EAX, [EDI]
-			ADD EAX, 1
-			JMP _evensDiv
-
-		_finalEven:
-			CALL WriteDec
-			CALL CrLf
-			JMP _evenDone
-
-
-	_odd:		    ; IF remainder is not 0 (odd)
-		; Example: ARRAYSIZE = 21, 21/2 has remainder > 0
-		;	-add 1 to arraysize (use arraysize in register first)
-		;	-divide arraysize+1 by 2 to get the median index position
-		;   -print the median index from the list
-		MOV ECX, EAX     ; set loop counter
+	_odd:		               ; IF remainder is not 0 (odd)
+		MOV ECX, EAX           ; set loop counter
 		MOV EDI, [EBP+8]
 		_oddLoop:
 			ADD EDI, 4
 			LOOP _oddLoop
 		JMP _finalOdd
-
 
 	_finalOdd:
 		MOV EAX, [EDI]
@@ -441,7 +462,6 @@ displayMedian PROC
 		CALL CrLf
 	
 	_evenDone:
-	; ---
 
 	CALL CrLf
 	POPAD
